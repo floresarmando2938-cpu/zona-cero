@@ -439,6 +439,302 @@
     font-size: 34px; letter-spacing: .08em;
   }
   .ov #credits p b { color: #e8584e; }
+
+/* ═══════════════════════════════════════════════════════════════
+   ZONA CERO V2.0 — ESTILOS ONLINE CO-OP & MENÚ REORGANIZADO
+   ═══════════════════════════════════════════════════════════════ */
+
+
+#victoryModal[hidden], #lanLobby[hidden] { display: none !important; }
+#victoryModal:not([hidden]), #lanLobby:not([hidden]) { display: flex !important; }
+
+/* ── PUNTO 7: REORGANIZACIÓN DEL MENÚ PRINCIPAL ──────────────── */
+#menu.card {
+  position: absolute; inset: 0;
+  display: flex !important; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: radial-gradient(circle at 50% 40%, rgba(20,28,24,0.7) 0%, rgba(6,9,7,0.95) 100%) !important;
+  padding: 24px 16px !important; z-index: 10;
+  overflow-y: auto; box-sizing: border-box;
+}
+
+.menu-brand-header {
+  text-align: center; margin-bottom: 24px;
+}
+.menu-brand-header h1 {
+  font-family: var(--display, 'Impact', sans-serif);
+  font-size: clamp(34px, 7vw, 64px);
+  color: #f5f2eb; letter-spacing: 0.12em;
+  text-transform: uppercase; margin: 0;
+  text-shadow: 0 0 25px rgba(220,50,40,0.6), 0 3px 6px #000;
+}
+.menu-brand-header p {
+  color: #d4a21a; font-size: clamp(12px, 2.5vw, 15px);
+  letter-spacing: 0.22em; text-transform: uppercase;
+  margin: 4px 0 0; font-weight: 700;
+}
+
+.menu-sections-wrapper {
+  display: flex; flex-direction: column;
+  gap: 18px; width: 100%; max-width: 580px;
+}
+
+.menu-group {
+  background: rgba(18, 22, 20, 0.75);
+  border: 1px solid rgba(220,180,140,0.2);
+  border-radius: 8px; padding: 12px 16px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+}
+.menu-group-title {
+  font-size: 11px; font-weight: 800; letter-spacing: 0.2em;
+  color: #a89f91; text-transform: uppercase; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+.menu-group-play {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+@media (max-width: 480px) {
+  .menu-group-play { grid-template-columns: 1fr; }
+}
+
+.btn-main-play {
+  min-height: 58px; font-size: 16px !important; letter-spacing: 0.15em;
+  border-radius: 6px; font-weight: 800; text-transform: uppercase;
+  cursor: pointer; border: none; color: #fff;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-main-play.primary-solo {
+  background: linear-gradient(180deg, #c4302b 0%, #7e1215 100%);
+  border: 2px solid #e74c3c;
+  box-shadow: 0 4px 15px rgba(231,76,60,0.4);
+}
+.btn-main-play.primary-online {
+  background: linear-gradient(180deg, #1b6ca8 0%, #0d3859 100%);
+  border: 2px solid #3498db;
+  box-shadow: 0 4px 15px rgba(52,152,219,0.4);
+}
+.btn-main-play:active { transform: scale(0.97); }
+
+.menu-group-grid-sub {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+@media (max-width: 480px) {
+  .menu-group-grid-sub { grid-template-columns: 1fr 1fr; }
+}
+.btn-sub-menu {
+  min-height: 42px; background: rgba(35, 42, 38, 0.9);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 5px; color: #e0ded9; font-size: 13px;
+  font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.18s;
+}
+.btn-sub-menu:hover { background: rgba(55, 66, 60, 0.95); }
+
+/* ── PUNTO 3: MENÚ ONLINE HORIZONTAL CON SWIPE Y SNAP ──────── */
+#lanLobby {
+  position: fixed; inset: 0; z-index: 500;
+  background: radial-gradient(circle at 50% 30%, rgba(15,22,28,0.92) 0%, rgba(5,8,12,0.98) 100%);
+  display: flex; flex-direction: column;
+  padding: 14px 16px; box-sizing: border-box;
+  font-family: var(--display, 'Arial', sans-serif);
+}
+
+.lobby-top-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+.lobby-title-area h2 {
+  margin: 0; font-size: 20px; color: #fff; letter-spacing: 0.1em;
+}
+.lobby-title-area small {
+  color: #3498db; font-size: 11px; font-weight: bold; letter-spacing: 0.18em;
+}
+.btn-close-lobby {
+  background: rgba(220,50,40,0.25); border: 1px solid #c0392b;
+  color: #ff6b6b; padding: 6px 14px; border-radius: 4px;
+  font-size: 13px; font-weight: bold; cursor: pointer;
+}
+
+/* Carrusel horizontal */
+.lan-carousel-wrapper {
+  flex: 1; overflow-x: auto; overflow-y: hidden;
+  display: flex; scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  margin: 12px 0; border-radius: 8px;
+}
+.lan-carousel-wrapper::-webkit-scrollbar { display: none; }
+
+.lan-slide {
+  flex: 0 0 100%; min-width: 100%;
+  scroll-snap-align: center; box-sizing: border-box;
+  padding: 8px 12px; display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start;
+  overflow-y: auto;
+}
+
+.lan-card-box {
+  width: 100%; max-width: 480px;
+  background: rgba(20, 27, 34, 0.85);
+  border: 1px solid rgba(52,152,219,0.3);
+  border-radius: 10px; padding: 18px 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+  box-sizing: border-box;
+}
+.lan-card-box h3 {
+  margin: 0 0 14px; font-size: 18px; color: #ecf0f1;
+  border-bottom: 2px solid rgba(52,152,219,0.5); padding-bottom: 6px;
+}
+
+.lan-field {
+  margin-bottom: 12px; width: 100%; text-align: left;
+}
+.lan-field label {
+  display: block; font-size: 11px; font-weight: 800;
+  color: #95a5a6; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px;
+}
+.lan-field input, .lan-field select {
+  width: 100%; box-sizing: border-box;
+  background: rgba(10, 14, 18, 0.9); border: 1px solid #2c3e50;
+  border-radius: 5px; color: #fff; padding: 10px 12px; font-size: 14px;
+}
+.lan-field input:focus, .lan-field select:focus {
+  border-color: #3498db; outline: none;
+}
+
+.lan-grid-2 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+
+/* Dots indicadores de carrusel */
+.carousel-dots {
+  display: flex; justify-content: center; gap: 8px; padding: 6px 0;
+}
+.carousel-dots .dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(255,255,255,0.25); cursor: pointer;
+  transition: all 0.2s ease;
+}
+.carousel-dots .dot.active {
+  width: 26px; border-radius: 6px; background: #3498db;
+}
+
+/* Lobby de espera de sala activa */
+.active-room-view {
+  width: 100%; max-width: 520px;
+  background: rgba(16, 24, 30, 0.92);
+  border: 1px solid #2980b9; border-radius: 10px;
+  padding: 16px 20px; margin: auto; box-sizing: border-box;
+  text-align: center;
+}
+.room-badge-large {
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(41,128,185,0.18); border: 2px dashed #3498db;
+  border-radius: 8px; padding: 10px 18px; margin: 12px 0;
+}
+.room-code-text {
+  font-size: 32px; font-weight: 900; letter-spacing: 6px;
+  color: #ffd700; font-family: monospace;
+}
+.room-meta-tags {
+  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 0;
+}
+.room-tag {
+  background: rgba(255,255,255,0.1); border-radius: 4px;
+  padding: 4px 10px; font-size: 11px; font-weight: 800; letter-spacing: 0.1em;
+}
+
+.lobby-players-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0;
+}
+.lobby-player-slot {
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px; padding: 8px 12px; font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.lobby-player-slot.occupied { border-color: #2ecc71; color: #2ecc71; }
+.lobby-player-slot.empty { color: #7f8c8d; font-style: italic; }
+
+/* Lista de salas públicas */
+.public-rooms-container {
+  display: flex; flex-direction: column; gap: 8px; width: 100%;
+  max-height: 240px; overflow-y: auto; margin-top: 8px;
+}
+.public-room-item {
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(52,152,219,0.3);
+  border-radius: 6px; padding: 10px 14px;
+}
+.public-room-item:hover { border-color: #3498db; }
+.btn-join-public {
+  background: #27ae60; border: none; color: #fff;
+  padding: 6px 16px; border-radius: 4px; font-weight: 800; cursor: pointer;
+}
+
+/* ── PUNTO 1: MODAL DE VICTORIA COMPARTIDA (OLEADA 10) ──────── */
+.victory-modal-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; box-sizing: border-box;
+  animation: victoryFadeIn 0.5s ease-out;
+}
+@keyframes victoryFadeIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.victory-card-box {
+  width: 100%; max-width: 520px;
+  background: linear-gradient(180deg, #1f1b13 0%, #0d0b07 100%);
+  border: 2px solid #d4a21a; border-radius: 12px;
+  box-shadow: 0 0 45px rgba(212,162,26,0.5), inset 0 0 15px rgba(212,162,26,0.2);
+  padding: 26px 24px; text-align: center; color: #fff;
+}
+.victory-stars-anim {
+  font-size: 28px; color: #ffd700; letter-spacing: 6px;
+  margin-bottom: 6px; text-shadow: 0 0 12px #ffd700;
+}
+.victory-card-box h1 {
+  font-family: var(--display, 'Impact', sans-serif);
+  font-size: clamp(36px, 8vw, 56px); margin: 0;
+  color: #ffd700; letter-spacing: 0.12em;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8), 0 0 30px rgba(255,215,0,0.6);
+}
+.victory-card-box p {
+  color: #e0ded9; font-size: 14px; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase; margin: 6px 0 16px;
+}
+.victory-vote-info {
+  background: rgba(0,0,0,0.5); border: 1px solid rgba(212,162,26,0.3);
+  border-radius: 6px; padding: 10px 14px; margin: 16px 0;
+  font-size: 13px; color: #f1c40f; font-weight: bold;
+}
+.victory-actions-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px;
+}
+@media (max-width: 480px) {
+  .victory-actions-grid { grid-template-columns: 1fr; }
+}
+.btn-victory-opt {
+  min-height: 50px; font-size: 15px; font-weight: 800;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  border-radius: 6px; cursor: pointer; border: none;
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+.btn-victory-opt.restart {
+  background: linear-gradient(180deg, #c0392b 0%, #7d1910 100%);
+  border: 1.5px solid #e74c3c; color: #fff;
+}
+.btn-victory-opt.continue {
+  background: linear-gradient(180deg, #27ae60 0%, #145a32 100%);
+  border: 1.5px solid #2ecc71; color: #fff;
+}
+.btn-victory-opt.selected {
+  outline: 3px solid #ffd700; transform: scale(1.03);
+}
+
 </style></head><body>
 <title>Zona Cero 3D</title>
 <!-- v1.1: sin fuentes remotas (se usan las del sistema) -->
@@ -794,7 +1090,42 @@
     <section class="card" id="menu" hidden>
       <p id="err" hidden></p>
       <span id="bestMenu" hidden>0</span><span id="chapMenu" hidden>0/3</span>
-      <button class="vbtn primary" id="playBtn">Jugar</button><button class="vbtn" id="mpBtn">Multijugador LAN</button><button class="vbtn" id="metaBtn">Mejoras ★</button><button class="vbtn" id="setBtn">Ajustes</button><button class="vbtn" id="howBtn">Cómo jugar</button><button class="vbtn" id="credBtn">Créditos</button>
+      <div class="menu-brand-header">
+        <h1>ZONA CERO</h1>
+        <p>SUPERVIVENCIA TÁCTICA CO-OP</p>
+      </div>
+
+      <div class="menu-sections-wrapper">
+        <!-- GRUPO JUGAR (Jerarquía visual principal) -->
+        <div class="menu-group">
+          <div class="menu-group-title">🎯 MODO DE COMBATE</div>
+          <div class="menu-group-play">
+            <button class="btn-main-play primary-solo" id="playBtn">
+              <span>👤 Jugar Solo</span>
+            </button>
+            <button class="btn-main-play primary-online" id="mpBtn">
+              <span>🌐 Online Co-op</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- GRUPO OPCIONES & MEJORAS -->
+        <div class="menu-group">
+          <div class="menu-group-title">⚙️ ARSENAL Y CONFIGURACIÓN</div>
+          <div class="menu-group-grid-sub">
+            <button class="btn-sub-menu" id="metaBtn">⭐ Mejoras</button>
+            <button class="btn-sub-menu" id="setBtn">⚙️ Ajustes</button>
+            <button class="btn-sub-menu" id="howBtn">📖 Manual</button>
+          </div>
+        </div>
+
+        <!-- GRUPO INFO -->
+        <div class="menu-group" style="padding:8px 14px;">
+          <div class="menu-group-grid-sub" style="grid-template-columns:1fr;">
+            <button class="btn-sub-menu" id="credBtn" style="min-height:34px;font-size:11px;">Créditos & Base Aurora</button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="card" id="pauseS" hidden>
@@ -2211,8 +2542,9 @@
       if (!found) { x = 0; z = 5; }
     }
     const scale = type === 'boss' ? 1 + g.bosses * 0.5 : 1 + 0.045 * (g.wave - 1);
-    const hp = Math.round(T.hp * scale);
-    const z0 = { type, ...ob, s: ob.root.scale.x, hp, max: hp, spd: T.spd * rnd(0.85, 1.15) * (1 + Math.min(0.35, g.wave * 0.012)), dmg: T.dmg, atkT: -1, atkDur: T.atk, state: 'walk',
+    const diffCfg = (typeof getDifficultyConfig === 'function') ? getDifficultyConfig() : { hpMult: 1, dmgMult: 1, countMult: 1 };
+    const hp = Math.round(T.hp * scale * diffCfg.hpMult);
+    const z0 = { type, ...ob, s: ob.root.scale.x, hp, max: hp, spd: T.spd * rnd(0.85, 1.15) * (1 + Math.min(0.35, g.wave * 0.012)), dmg: Math.round(T.dmg * diffCfg.dmgMult), atkT: -1, atkDur: T.atk, state: 'walk',
       dir: Math.random() < 0.5 ? 1 : -1, phase: rnd(0, 6), lurch: rnd(0, 6), kx: 0, kz: 0, deadT: 0, yaw: 0, stagger: 0, tilt: rnd(-0.2, 0.2), groanT: rnd(2, 6), hitDone: false, x, z, cr: type === 'crawler', low: type === 'crawler' ? 0.45 : 1, flinch: 0, spitT: 1.5, stuckTimer: 0, stuckX: x, stuckZ: z };
     ob.root.position.set(x, H(x, z), z);
     ob.root.rotation.y = Math.atan2(p.x - x, p.z - z); z0.yaw = ob.root.rotation.y;
@@ -3107,6 +3439,7 @@
     setTimeout(() => { if (!done) toMenu(); }, 1800);
   }
   bootVideo();
+  setTimeout(initLanCarousel, 500);
   $('playBtn').onclick = startIntro;
   /* ajustes y cómo jugar */
   let backTo = 'menu';
@@ -3373,6 +3706,15 @@
         g.supplyDone = true; g.score += 100 * g.wave; p.hp = Math.min(p.max, p.hp + 15);
         const a = rnd(0, 6.28);
         dropPickup(p.x + Math.cos(a) * 7, p.z + Math.sin(a) * 7, 'ammo'); dropPickup(p.x + Math.cos(a + 1.2) * 8, p.z + Math.sin(a + 1.2) * 8, 'med'); dropPickup(p.x + Math.cos(a + 2.4) * 7, p.z + Math.sin(a + 2.4) * 7, 'ammo');
+        // PUNTO 1: Condición de Victoria Compartida en Oleada 10
+        if (g.wave === 10 && (!LAN || !LAN.active || LAN.roomMode !== 'survival')) {
+          if (typeof LAN !== 'undefined' && LAN.active && LAN.isHost) {
+            lanSend({ t: 'victory', wave: 10 });
+          }
+          triggerSharedVictory();
+          return;
+        }
+
         const bonus = 60 + 30 * g.wave; g.cash += bonus;
         if (typeof LAN !== 'undefined' && LAN.active && LAN.isHost) {
           lanSend({ t: 'waveEnd', wave: g.wave, bonus: bonus });
@@ -3611,35 +3953,8 @@ let _peerCI = 0;
 function peerColor() { return PEER_COLORS[(_peerCI++) % PEER_COLORS.length]; }
 
 function createPeerMesh(col) {
-  const root = new THREE.Group();
-  const bodyMat = new THREE.MeshLambertMaterial({ color: col || '#2a9d8f' });
-  const darkMat = new THREE.MeshLambertMaterial({ color: 0x1f2421 });
-  const visorMat = new THREE.MeshBasicMaterial({ color: 0x38ef7d });
-
-  // Torso / Chaleco táctico
-  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.55, 0.24), bodyMat);
-  torso.position.y = 0.95; torso.castShadow = true; root.add(torso);
-
-  const vest = new THREE.Mesh(new THREE.BoxGeometry(0.40, 0.38, 0.26), darkMat);
-  vest.position.y = 0.95; root.add(vest);
-
-  // Cabeza / Casco
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8), darkMat);
-  head.position.y = 1.40; head.castShadow = true; root.add(head);
-
-  // Visor luminoso
-  const visor = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.06, 0.08), visorMat);
-  visor.position.set(0, 1.40, -0.12); root.add(visor);
-
-  // Piernas
-  const legL = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.65, 8), darkMat);
-  legL.position.set(-0.11, 0.35, 0); legL.castShadow = true; root.add(legL);
-  const legR = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.65, 8), darkMat);
-  legR.position.set(0.11, 0.35, 0); legR.castShadow = true; root.add(legR);
-
-  // Arma en mano
-  const gun = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.10, 0.45), darkMat);
-  gun.position.set(0.20, 0.95, -0.22); root.add(gun);
+  const soldier = buildRealSoldierAvatar(col);
+  const root = soldier.root;
 
   // Nombre y barra de vida flotante sobre el compañero
   const canvas = document.createElement('canvas');
@@ -3806,6 +4121,50 @@ function lanHandle(msg) {
       LAN.id = msg.id;
       LAN.isHost = msg.isHost;
       LAN.roomCode = msg.room || 'GLOBAL';
+      LAN.roomName = msg.roomName || ('Sala ' + LAN.roomCode);
+      LAN.roomMode = msg.mode || 'campaign';
+      LAN.roomDiff = msg.difficulty || 'normal';
+      LAN.isPrivate = msg.isPrivate !== undefined ? msg.isPrivate : true;
+
+      showActiveRoomView(LAN.roomCode, LAN.roomName, LAN.isPrivate, LAN.roomMode, LAN.roomDiff);
+
+      const allPlayers = [{ id: LAN.id, name: LAN.name, isHost: LAN.isHost }].concat(msg.players || []);
+      updateActiveRoomSlots(allPlayers);
+
+      const startBtnEl = document.getElementById('lanStartGameBtn');
+      if (startBtnEl) startBtnEl.hidden = !LAN.isHost;
+
+      const statusEl = document.getElementById('lanLobbyStatus');
+      if (statusEl) {
+        statusEl.textContent = LAN.isHost
+          ? '¡Sala lista! Comparte el código ' + LAN.roomCode + ' o espera compañeros.'
+          : '¡Conectado a la sala! Esperando que el anfitrión inicie…';
+      }
+
+      (msg.players || []).forEach(pl => {
+        if (pl.id !== LAN.id) addPeer(pl.id, pl.name, pl.hp, !!pl.downed);
+      });
+      break;
+
+    case 'roomList':
+      renderPublicRooms(msg.rooms || []);
+      break;
+
+    case 'victory':
+      triggerSharedVictory();
+      break;
+
+    case 'victoryVoteStatus':
+      const vStatus = document.getElementById('victoryVoteStatus');
+      if (vStatus && msg.votes) {
+        const votesSummary = msg.votes.map(v => v.name + ': ' + (v.vote === 'restart' ? 'Reiniciar' : 'Seguir')).join(' · ');
+        vStatus.textContent = 'Votación (' + msg.votes.length + '/' + msg.total + '): ' + votesSummary + ' (esperando confirmación…)';
+      }
+      break;
+
+    case 'victoryAction':
+      applyVictoryAction(msg.action);
+      break;
 
       // Mostrar código de sala en el badge
       const codeBadge = document.getElementById('roomCodeBadge');
@@ -4387,6 +4746,404 @@ function triggerExtractionVictory() {
   g.state = 'done';
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   ZONA CERO V2.0 — LÓGICA COMPLETA DE SALAS, AVATARES Y VICTORIA
+   ═══════════════════════════════════════════════════════════════ */
+
+// ── PUNTO 6: CONFIGURACIÓN DE DIFICULTAD REAL ──────────────────
+const DIFFICULTY_PRESETS = {
+  easy:    { hpMult: 0.75, dmgMult: 0.75, countMult: 0.8, label: '🟢 Fácil' },
+  normal:  { hpMult: 1.0,  dmgMult: 1.0,  countMult: 1.0, label: '🟡 Normal' },
+  hard:    { hpMult: 1.5,  dmgMult: 1.5,  countMult: 1.3, label: '🟠 Difícil' },
+  extreme: { hpMult: 2.5,  dmgMult: 2.0,  countMult: 1.6, label: '🔴 Extremo' }
+};
+
+function getDifficultyConfig() {
+  const diffKey = (LAN && LAN.active && LAN.roomDiff) ? LAN.roomDiff : (window._selectedDiff || 'normal');
+  return DIFFICULTY_PRESETS[diffKey] || DIFFICULTY_PRESETS.normal;
+}
+
+// ── PUNTO 3: GESTIÓN DE SWIPE Y SNAP DEL CARRUSEL ──────────────
+function initLanCarousel() {
+  const c = document.getElementById('lanCarousel');
+  const dots = document.getElementById('lanCarouselDots');
+  if (!c || !dots) return;
+
+  c.addEventListener('scroll', () => {
+    const width = c.clientWidth || 1;
+    const page = Math.round(c.scrollLeft / width);
+    const dotSpans = dots.querySelectorAll('.dot');
+    dotSpans.forEach((d, i) => d.classList.toggle('active', i === page));
+  }, { passive: true });
+}
+
+function lanScrollToSlide(idx) {
+  const c = document.getElementById('lanCarousel');
+  if (c) c.scrollTo({ left: idx * c.clientWidth, behavior: 'smooth' });
+}
+window.lanScrollToSlide = lanScrollToSlide;
+
+// ── PUNTO 2, 5, 6, 9: ACCIONES DE SALAS ────────────────────────
+function lanCreateRoom() {
+  const nameInput = document.getElementById('lanName');
+  const roomNameInput = document.getElementById('lanRoomName');
+  const privacySel = document.getElementById('lanPrivacy');
+  const modeSel = document.getElementById('lanGameMode');
+  const diffSel = document.getElementById('lanDifficulty');
+
+  const pName = (nameInput && nameInput.value.trim()) || 'Soldado';
+  const rName = (roomNameInput && roomNameInput.value.trim().slice(0, 20)) || ('Sala de ' + pName);
+  const isPriv = privacySel ? (privacySel.value === 'private') : true;
+  const mode = modeSel ? modeSel.value : 'campaign';
+  const diff = diffSel ? diffSel.value : 'normal';
+
+  try { localStorage.setItem('zc3d.name', pName); } catch(_) {}
+
+  LAN.name = pName;
+  LAN.roomName = rName;
+  LAN.isPrivate = isPriv;
+  LAN.roomMode = mode;
+  LAN.roomDiff = diff;
+
+  lanConnect(LAN.url, pName, {
+    create: true,
+    roomName: rName,
+    isPrivate: isPriv,
+    mode: mode,
+    difficulty: diff
+  });
+}
+window.lanCreateRoom = lanCreateRoom;
+
+function lanJoinWithCode() {
+  const nameInput = document.getElementById('lanName');
+  const roomInput = document.getElementById('lanRoomInput');
+  const errDiv = document.getElementById('lanJoinError');
+
+  const pName = (nameInput && nameInput.value.trim()) || 'Soldado';
+  const code = (roomInput && roomInput.value.trim().toUpperCase()) || '';
+
+  if (errDiv) errDiv.hidden = true;
+
+  if (code.length < 4) {
+    if (errDiv) { errDiv.textContent = 'El código debe tener 4 caracteres alfanuméricos.'; errDiv.hidden = false; }
+    return;
+  }
+
+  try { localStorage.setItem('zc3d.name', pName); } catch(_) {}
+  LAN.name = pName;
+
+  lanConnect(LAN.url, pName, { room: code });
+}
+window.lanJoinWithCode = lanJoinWithCode;
+
+function lanFetchPublicRooms() {
+  const listEl = document.getElementById('lanPublicList');
+  if (listEl) listEl.innerHTML = '<div style="color:#7f8c8d;font-size:13px;text-align:center;padding:16px;">Consultando servidores...</div>';
+
+  if (!LAN.ws || LAN.ws.readyState !== 1) {
+    // Conexión temporal para consultar lista
+    const tmpWs = new WebSocket(LAN.url || 'wss://zona-cero-1.onrender.com');
+    tmpWs.onopen = () => tmpWs.send(JSON.stringify({ t: 'listRooms' }));
+    tmpWs.onmessage = ev => {
+      try {
+        const msg = JSON.parse(ev.data);
+        if (msg.t === 'roomList') renderPublicRooms(msg.rooms || []);
+      } catch(_) {}
+      tmpWs.close();
+    };
+    tmpWs.onerror = () => {
+      if (listEl) listEl.innerHTML = '<div style="color:#e74c3c;font-size:13px;text-align:center;padding:16px;">No se pudo conectar al servidor de salas.</div>';
+    };
+  } else {
+    lanSend({ t: 'listRooms' });
+  }
+}
+window.lanFetchPublicRooms = lanFetchPublicRooms;
+
+function renderPublicRooms(rooms) {
+  const listEl = document.getElementById('lanPublicList');
+  if (!listEl) return;
+  if (!rooms || rooms.length === 0) {
+    listEl.innerHTML = '<div style="color:#95a5a6;font-size:13px;text-align:center;padding:18px;">No hay partidas públicas disponibles ahora mismo.<br><small style="color:#7f8c8d;">¡Sé el primero en crear una!</small></div>';
+    return;
+  }
+  listEl.innerHTML = '';
+  rooms.forEach(r => {
+    const item = document.createElement('div');
+    item.className = 'public-room-item';
+    const isFull = r.playersCount >= r.maxPlayers;
+    const modeLabel = r.mode === 'survival' ? '♾️ Infinita' : '🏁 Nivel 10';
+    const diffLabel = (DIFFICULTY_PRESETS[r.difficulty] || DIFFICULTY_PRESETS.normal).label;
+
+    item.innerHTML =
+      '<div>' +
+        '<div style="font-weight:bold;color:#fff;font-size:14px;">' + (r.name || ('Sala ' + r.code)) + '</div>' +
+        '<div style="font-size:11px;color:#95a5a6;margin-top:2px;">' + modeLabel + ' · ' + diffLabel + ' · <b style="color:' + (isFull ? '#e74c3c' : '#2ecc71') + '">' + r.playersCount + '/' + r.maxPlayers + '</b></div>' +
+      '</div>' +
+      (isFull
+        ? '<span style="color:#e74c3c;font-size:12px;font-weight:bold;">LLENA</span>'
+        : '<button class="btn-join-public" onclick="window.lanJoinDirect(\'' + r.code + '\')">Unirse</button>');
+    listEl.appendChild(item);
+  });
+}
+
+function lanJoinDirect(code) {
+  const nameInput = document.getElementById('lanName');
+  const pName = (nameInput && nameInput.value.trim()) || 'Soldado';
+  try { localStorage.setItem('zc3d.name', pName); } catch(_) {}
+  LAN.name = pName;
+  lanConnect(LAN.url, pName, { room: code });
+}
+window.lanJoinDirect = lanJoinDirect;
+
+function showActiveRoomView(roomCode, roomName, isPriv, mode, diff) {
+  const navView = document.getElementById('lanNavView');
+  const roomView = document.getElementById('lanRoomActiveView');
+  if (navView) navView.style.display = 'none';
+  if (roomView) roomView.style.display = 'flex';
+
+  const nameEl = document.getElementById('activeRoomNameDisplay');
+  const codeEl = document.getElementById('activeRoomCodeDisplay');
+  const modeTag = document.getElementById('activeModeTag');
+  const diffTag = document.getElementById('activeDiffTag');
+  const privTag = document.getElementById('activePrivTag');
+
+  if (nameEl) nameEl.textContent = roomName || ('Sala ' + roomCode);
+  if (codeEl) codeEl.textContent = roomCode;
+  if (modeTag) modeTag.textContent = mode === 'survival' ? '♾️ Supervivencia Infinita' : '🏁 Campaña (Nivel 10)';
+  if (diffTag) diffTag.textContent = (DIFFICULTY_PRESETS[diff] || DIFFICULTY_PRESETS.normal).label;
+  if (privTag) privTag.textContent = isPriv ? '🔒 Privada' : '🌐 Pública';
+}
+
+function updateActiveRoomSlots(players) {
+  const grid = document.getElementById('activePlayersGrid');
+  if (!grid) return;
+  const list = players || [];
+  for (let i = 0; i < 4; i++) {
+    const slot = document.getElementById('slot' + i);
+    if (!slot) continue;
+    if (i < list.length) {
+      const pl = list[i];
+      slot.className = 'lobby-player-slot occupied';
+      slot.textContent = (i + 1) + '. ' + pl.name + (pl.isHost ? ' 👑 (Host)' : '');
+    } else {
+      slot.className = 'lobby-player-slot empty';
+      slot.textContent = (i + 1) + '. Vacío';
+    }
+  }
+}
+
+// ── PUNTO 4: AVATARES REALES EN 3D CON SKELETON & ANIMACIONES ──
+let PCX_CACHED_MODEL = null;
+
+function buildRealSoldierAvatar(col) {
+  const root = new THREE.Group();
+
+  // Si pcx_data está disponible, instanciamos un soldado esquelético idéntico
+  try {
+    const el = document.getElementById('pcx_data');
+    if (el) {
+      if (!PCX_CACHED_MODEL) PCX_CACHED_MODEL = JSON.parse(el.textContent);
+      const M = PCX_CACHED_MODEL;
+      const f32 = s => new Float32Array(smB(s));
+      const jset = new Set(M.joints);
+      const objs = M.nodes.map((n, i) => {
+        const o = jset.has(i) ? new THREE.Bone() : new THREE.Object3D();
+        o.name = 'b' + i;
+        o.position.set(n.t[0], n.t[1], n.t[2]);
+        o.quaternion.set(n.q[0], n.q[1], n.q[2], n.q[3]);
+        o.scale.set(n.s[0], n.s[1], n.s[2]);
+        return o;
+      });
+
+      const modelRoot = new THREE.Group(), outer = new THREE.Group();
+      M.nodes.forEach((n, i) => {
+        if (n.p >= 0) objs[n.p].add(objs[i]); else modelRoot.add(objs[i]);
+      });
+      outer.add(modelRoot);
+      outer.updateMatrixWorld(true);
+
+      const ibm = f32(M.ibm);
+      const bones = M.joints.map(i => objs[i]);
+      const skel = new THREE.Skeleton(bones, bones.map((_, k) => new THREE.Matrix4().fromArray(ibm, k * 16)));
+
+      M.meshes.forEach(m => {
+        const g = new THREE.BufferGeometry();
+        g.setAttribute('position', new THREE.BufferAttribute(f32(m.pos), 3));
+        g.setAttribute('normal', new THREE.BufferAttribute(f32(m.nor), 3));
+        g.setAttribute('uv', new THREE.BufferAttribute(f32(m.uv), 2));
+        g.setAttribute('skinIndex', new THREE.BufferAttribute(Uint16Array.from(new Uint8Array(smB(m.ji))), 4));
+        g.setAttribute('skinWeight', new THREE.BufferAttribute(f32(m.w), 4));
+        g.setIndex(new THREE.BufferAttribute(m.i32 ? new Uint32Array(smB(m.idx)) : new Uint16Array(smB(m.idx)), 1));
+
+        // Tintar atuendo según color del jugador aliado
+        const soldierColor = col ? new THREE.Color(col) : new THREE.Color(0x3a4f41);
+        const mat = new THREE.MeshLambertMaterial({
+          color: soldierColor,
+          side: THREE.DoubleSide
+        });
+        mat.skinning = true;
+        const sm = new THREE.SkinnedMesh(g, mat);
+        sm.frustumCulled = false;
+        outer.add(sm);
+        sm.bind(skel, new THREE.Matrix4());
+      });
+
+      const mixer = new THREE.AnimationMixer(modelRoot);
+      const actions = {};
+      for (const k in M.anim) {
+        const A = M.anim[k];
+        const tracks = A.tracks.map(t => t.path === 't'
+          ? new THREE.VectorKeyframeTrack('b' + t.node + '.position', f32(t.t), f32(t.v))
+          : new THREE.QuaternionKeyframeTrack('b' + t.node + '.quaternion', f32(t.t), f32(t.v)));
+        const clip = new THREE.AnimationClip(k, -1, tracks);
+        actions[k] = mixer.clipAction(clip);
+      }
+
+      // Añadir rifle al hueso de la mano
+      try {
+        const gunGeo = new THREE.BoxGeometry(0.06, 0.12, 0.65);
+        const gunMat = new THREE.MeshLambertMaterial({ color: 0x1c1c1c });
+        const gunMesh = new THREE.Mesh(gunGeo, gunMat);
+        gunMesh.position.set(0.05, 0, -0.15);
+        objs[M.hand].add(gunMesh);
+      } catch(_) {}
+
+      outer.scale.setScalar(M.sc || 1);
+      root.add(outer);
+
+      // Activar idle por defecto
+      if (actions.aim) { actions.aim.play(); }
+
+      return { root, outer, mixer, actions, isSkinned: true };
+    }
+  } catch(e) {
+    console.warn('Fallback a modelo de soldado de alto detalle:', e);
+  }
+
+  // Modelo de soldado de alta fidelidad procedural (siempre disponible)
+  const soldierMat = new THREE.MeshLambertMaterial({ color: col || 0x2e4034 });
+  const gearMat = new THREE.MeshLambertMaterial({ color: 0x1a1a1a });
+  const skinMat = new THREE.MeshLambertMaterial({ color: 0xd4a373 });
+  const visorMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc });
+
+  // Piernas
+  const legL = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.68, 0.14), gearMat); legL.position.set(-0.11, 0.34, 0); root.add(legL);
+  const legR = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.68, 0.14), gearMat); legR.position.set(0.11, 0.34, 0); root.add(legR);
+
+  // Torso / Chaqueta militar
+  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.52, 0.24), soldierMat); torso.position.y = 0.94; root.add(torso);
+  const vest = new THREE.Mesh(new THREE.BoxGeometry(0.40, 0.36, 0.26), gearMat); vest.position.y = 0.94; root.add(vest);
+
+  // Brazos
+  const armL = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.48, 0.11), soldierMat); armL.position.set(-0.25, 0.92, 0); root.add(armL);
+  const armR = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.48, 0.11), soldierMat); armR.position.set(0.25, 0.92, -0.1); armR.rotation.x = -0.5; root.add(armR);
+
+  // Cabeza y Casco
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 8), skinMat); head.position.y = 1.34; root.add(head);
+  const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.135, 10, 8), gearMat); helmet.position.set(0, 1.36, 0); root.add(helmet);
+  const visor = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.05, 0.06), visorMat); visor.position.set(0, 1.35, -0.11); root.add(visor);
+
+  // Rifle táctico
+  const rifle = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.09, 0.55), gearMat); rifle.position.set(0.18, 0.9, -0.22); root.add(rifle);
+
+  return { root, legL, legR, armL, armR, isSkinned: false };
+}
+
+// ── PUNTO 1: VICTORIA COMPARTIDA & VOTACIÓN SINCRONIZADA ─────────
+let _myVictoryVote = null;
+
+function triggerSharedVictory() {
+  if (g.state === 'victory') return;
+  g.state = 'victory';
+
+  // Detener inputs y spawns
+  input.fire = false;
+  ptrs.clear();
+  if (stick) stick = null;
+
+  const modal = document.getElementById('victoryModal');
+  if (modal) modal.hidden = false;
+
+  const vStatus = document.getElementById('victoryVoteStatus');
+  if (vStatus) vStatus.textContent = '¡Oleada 10 completada! Elige una opción para continuar:';
+
+  // Desmarcar botones previos
+  const bRest = document.getElementById('btnVictoryRestart');
+  const bCont = document.getElementById('btnVictoryContinue');
+  if (bRest) bRest.classList.remove('selected');
+  if (bCont) bCont.classList.remove('selected');
+  _myVictoryVote = null;
+
+  try { sfx.wave(); } catch(_) {}
+}
+window.triggerSharedVictory = triggerSharedVictory;
+
+function castVictoryVote(choice) {
+  _myVictoryVote = choice;
+
+  const bRest = document.getElementById('btnVictoryRestart');
+  const bCont = document.getElementById('btnVictoryContinue');
+  if (bRest) bRest.classList.toggle('selected', choice === 'restart');
+  if (bCont) bCont.classList.toggle('selected', choice === 'continue');
+
+  const vStatus = document.getElementById('victoryVoteStatus');
+  const choiceText = choice === 'restart' ? 'Reiniciar (Oleada 1)' : 'Seguir Jugando (Libre)';
+
+  if (!LAN.active || !LAN.connected) {
+    // Modo individual: aplicar de inmediato
+    applyVictoryAction(choice);
+    return;
+  }
+
+  if (vStatus) {
+    vStatus.textContent = 'Has votado: ' + choiceText + '. Esperando confirmación del otro jugador…';
+  }
+
+  // Notificar al servidor vía RPC
+  lanSend({ t: 'victoryVote', vote: choice });
+}
+window.castVictoryVote = castVictoryVote;
+
+function applyVictoryAction(action) {
+  const modal = document.getElementById('victoryModal');
+  if (modal) modal.hidden = true;
+
+  if (action === 'restart') {
+    // Reiniciar desde oleada 1 con estado limpio
+    g.wave = 1;
+    g.kills = 0;
+    p.hp = p.max || 100;
+    p.downed = false;
+    p.x = 0; p.z = 0;
+    banner('¡Partida Reiniciada!', 'Oleada 1 · Sector Alfa');
+    g.state = 'play';
+    startWave(1);
+  } else {
+    // Seguir jugando en modo supervivencia libre
+    banner('¡Modo Supervivencia Libre!', 'Oleada 11 · Sin límites');
+    g.state = 'play';
+    startWave(11);
+  }
+}
+
+// ── PUNTO 8: LIMPIEZA DE NOMBRES AL VOLVER AL MENÚ ─────────────
+const _origShow = show;
+show = function(name) {
+  if (name === 'menu') {
+    // Limpiar toda la UI del lobby para que no aparezca ningún nombre en el menú principal
+    const lobby = document.getElementById('lanLobby');
+    if (lobby) lobby.hidden = true;
+    const mpHud = document.getElementById('mpHud');
+    if (mpHud) mpHud.hidden = true;
+    const vModal = document.getElementById('victoryModal');
+    if (vModal) vModal.hidden = true;
+  }
+  _origShow(name);
+};
+
 function lanEnterGame() {
   LAN.active = true;
   closeLobby(false);
@@ -4570,25 +5327,35 @@ function lanToMenu() {
 var _lanMode = 'create';
 
 function openLobby() {
-  show('menu');
   const lb = document.getElementById('lanLobby');
   if (lb) lb.hidden = false;
+  const navView = document.getElementById('lanNavView');
+  const roomView = document.getElementById('lanRoomActiveView');
+  if (navView) navView.style.display = 'flex';
+  if (roomView) roomView.style.display = 'none';
+
   const savedName = localStorage.getItem('zc3d.name');
   if (savedName) {
     const ni = document.getElementById('lanName');
     if (ni) ni.value = savedName;
   }
-  lanTab('create');
+  if (typeof lanScrollToSlide === 'function') lanScrollToSlide(0);
 }
 
 function closeLobby(isLeaving) {
   const lb = document.getElementById('lanLobby');
   if (lb) lb.hidden = true;
+  const navView = document.getElementById('lanNavView');
+  const roomView = document.getElementById('lanRoomActiveView');
+  if (navView) navView.style.display = 'flex';
+  if (roomView) roomView.style.display = 'none';
+
   if (isLeaving === true && LAN.ws) {
     try { LAN.ws.close(); } catch(_) {}
     LAN.ws = null;
     LAN.connected = false;
     LAN.roomCode = null;
+    LAN.active = false;
   }
 }
 
@@ -4708,42 +5475,136 @@ applyQuality(); resetGame(); g.state = 'menu';
 
 
 <!-- MULTIPLAYER LOBBY -->
+<!-- MULTIPLAYER LOBBY V2.0: HORIZONTAL, SWIPE GESTUAL & SALAS COMPLETAS -->
 <div id="lanLobby" hidden>
-  <h1>Zona Cero<small>MULTIJUGADOR CO-OP EN LA NUBE</small></h1>
-  <div id="lanTabs">
-    <button class="ltab on" id="ltCreate" onclick="window.lanTab && window.lanTab('create')">Crear Sala</button>
-    <button class="ltab"    id="ltJoin"   onclick="window.lanTab && window.lanTab('join')">Unirse con Código</button>
+  <div class="lobby-top-bar">
+    <div class="lobby-title-area">
+      <h2>ZONA CERO ONLINE</h2>
+      <small>COOPERATIVO MULTIJUGADOR EN LA NUBE</small>
+    </div>
+    <button class="btn-close-lobby" onclick="window.closeLobby && window.closeLobby(true)">✕ Salir</button>
   </div>
-  <div id="lanPanel">
-    <label>TU NOMBRE DE SOLDADO
-      <input type="text" id="lanName" value="Soldado" maxlength="16" placeholder="Nombre de jugador">
-    </label>
-    <div id="lanCreatePanel">
-      <div id="roomCodeBadge" class="room-code-badge" hidden>
-        <div>
-          <span class="room-label">CÓDIGO DE SALA</span>
-          <div class="room-code" id="displayRoomCode">----</div>
+
+  <!-- VISTA 1: CARRUSEL HORIZONTAL (Crear / Unirse / Salas públicas) -->
+  <div id="lanNavView" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+    <div style="padding:6px 0;text-align:center;">
+      <span style="font-size:12px;color:#95a5a6;font-weight:700;">SOLDADO: </span>
+      <input type="text" id="lanName" value="Soldado" maxlength="16" style="background:#111;color:#ffd700;border:1px solid #444;border-radius:4px;padding:4px 8px;font-weight:bold;font-size:13px;width:140px;text-align:center;">
+    </div>
+
+    <div class="lan-carousel-wrapper" id="lanCarousel">
+      <!-- SLIDE 0: CREAR SALA (Puntos 2, 5, 6, 9) -->
+      <div class="lan-slide" id="slideCreate">
+        <div class="lan-card-box">
+          <h3>🟢 Crear Partida</h3>
+          <div class="lan-field">
+            <label>Nombre de la sala</label>
+            <input type="text" id="lanRoomName" maxlength="20" placeholder="Ej: Operación Aurora">
+          </div>
+          <div class="lan-grid-2">
+            <div class="lan-field">
+              <label>Privacidad</label>
+              <select id="lanPrivacy">
+                <option value="private">🔒 Privada (con código)</option>
+                <option value="public">🌐 Pública (sin código)</option>
+              </select>
+            </div>
+            <div class="lan-field">
+              <label>Modo de juego</label>
+              <select id="lanGameMode">
+                <option value="campaign">🏁 Campaña (Nivel 10)</option>
+                <option value="survival">♾️ Supervivencia Infinita</option>
+              </select>
+            </div>
+          </div>
+          <div class="lan-field">
+            <label>Dificultad de combate</label>
+            <select id="lanDifficulty">
+              <option value="easy">🟢 Fácil (Zombies ×0.75)</option>
+              <option value="normal" selected>🟡 Normal (Estándar)</option>
+              <option value="hard">🟠 Difícil (Zombies ×1.5)</option>
+              <option value="extreme">🔴 Extremo (Zombies ×2.5)</option>
+            </select>
+          </div>
+          <button class="btn-main-play primary-online" style="width:100%;margin-top:6px;" onclick="window.lanCreateRoom && window.lanCreateRoom()">
+            Crear y Abrir Sala
+          </button>
         </div>
-        <button type="button" class="btn-copy" id="btnCopyCode" onclick="window.copyRoomCode && window.copyRoomCode()">📋 Copiar</button>
       </div>
-      <div id="lanStatus">Pulsa Crear Sala para generar tu partida privada</div>
+
+      <!-- SLIDE 1: UNIRSE CON CÓDIGO (Punto 2) -->
+      <div class="lan-slide" id="slideJoin">
+        <div class="lan-card-box" style="text-align:center;">
+          <h3>🔵 Unirse con Código</h3>
+          <p style="font-size:13px;color:#bdc3c7;margin:8px 0 14px;">Introduce el código alfanumérico de 4 caracteres de la sala:</p>
+          <div class="lan-field" style="margin-bottom:16px;">
+            <input type="text" id="lanRoomInput" maxlength="4" placeholder="EJ: A7K2" autocomplete="off" autocapitalize="characters"
+              style="font-size:28px;letter-spacing:6px;text-align:center;color:#ffd700;font-weight:900;text-transform:uppercase;padding:12px;">
+          </div>
+          <button class="btn-main-play primary-solo" style="width:100%;" onclick="window.lanJoinWithCode && window.lanJoinWithCode()">
+            Unirse a la Partida
+          </button>
+          <div id="lanJoinError" style="margin-top:12px;font-size:13px;color:#e74c3c;font-weight:bold;" hidden></div>
+        </div>
+      </div>
+
+      <!-- SLIDE 2: NAVEGADOR DE SALAS PÚBLICAS (Punto 9) -->
+      <div class="lan-slide" id="slidePublic">
+        <div class="lan-card-box">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <h3 style="margin:0;border:none;padding:0;">🌐 Partidas Públicas</h3>
+            <button class="btn-sub-menu" style="min-height:28px;padding:2px 10px;font-size:11px;" onclick="window.lanFetchPublicRooms && window.lanFetchPublicRooms()">🔄 Actualizar</button>
+          </div>
+          <div id="lanPublicList" class="public-rooms-container">
+            <div style="color:#7f8c8d;font-size:13px;text-align:center;padding:20px;">Pulsa Actualizar para buscar partidas públicas...</div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div id="lanJoinPanel" hidden>
-      <label>CÓDIGO DE SALA (4 LETRAS)
-        <input type="text" id="lanRoomInput" maxlength="6" placeholder="EJ: K7X9" style="text-transform:uppercase;font-size:22px;letter-spacing:4px;text-align:center;">
-      </label>
-      <div id="lanStatus2">Introduce el código de sala de tu amigo y pulsa Conectar</div>
-      <details style="font-size:11px;opacity:.7;margin-top:4px;">
-        <summary style="cursor:pointer;">Servidor avanzado (Opcional)</summary>
-        <input type="text" id="lanIP" value="wss://zona-cero-1.onrender.com" placeholder="wss://... o IP" style="margin-top:4px;font-size:12px;">
-      </details>
+
+    <!-- PUNTOS INDICADORES DE SWIPE -->
+    <div class="carousel-dots" id="lanCarouselDots">
+      <span class="dot active" onclick="window.lanScrollToSlide && window.lanScrollToSlide(0)"></span>
+      <span class="dot" onclick="window.lanScrollToSlide && window.lanScrollToSlide(1)"></span>
+      <span class="dot" onclick="window.lanScrollToSlide && window.lanScrollToSlide(2)"></span>
     </div>
-    <div id="lanPlayers"></div>
-    <button class="lbtn primary" id="lanActBtn" onclick="window.lanAction && window.lanAction()">Crear Sala</button>
-    <button class="lbtn secondary" id="lanStartBtn" onclick="window.lanStartGame && window.lanStartGame()" hidden>Iniciar partida</button>
-    <button class="lbtn secondary" id="lanBackBtn" onclick="window.closeLobby && window.closeLobby(true)">Volver al menu</button>
   </div>
-</div>
+
+  <!-- VISTA 2: SALA ACTIVA / LOBBY DE ESPERA (Puntos 2, 5, 6, 8, 9) -->
+  <div id="lanRoomActiveView" style="display:none;flex-direction:column;flex:1;justify-content:center;align-items:center;">
+    <div class="active-room-view">
+      <h2 id="activeRoomNameDisplay" style="margin:0;color:#fff;font-size:22px;">Sala de Soldado</h2>
+      
+      <div class="room-badge-large">
+        <div style="text-align:left;">
+          <div style="font-size:11px;color:#3498db;font-weight:bold;">CÓDIGO DE ENTRADA</div>
+          <div class="room-code-text" id="activeRoomCodeDisplay">----</div>
+        </div>
+        <button class="btn-sub-menu" onclick="window.copyRoomCode && window.copyRoomCode()" style="padding:8px 14px;">📋 Copiar</button>
+      </div>
+
+      <div class="room-meta-tags">
+        <span class="room-tag" id="activeModeTag" style="color:#2ecc71;">🏁 Campaña (Nivel 10)</span>
+        <span class="room-tag" id="activeDiffTag" style="color:#f39c12;">🟡 Normal</span>
+        <span class="room-tag" id="activePrivTag" style="color:#9b59b6;">🔒 Privada</span>
+      </div>
+
+      <div style="font-size:12px;color:#95a5a6;margin:12px 0 6px;text-align:left;font-weight:bold;">ESCUADRÓN (MÁX. 4 JUGADORES):</div>
+      <div class="lobby-players-grid" id="activePlayersGrid">
+        <div class="lobby-player-slot occupied" id="slot0">1. Esperando...</div>
+        <div class="lobby-player-slot empty" id="slot1">2. Vacío</div>
+        <div class="lobby-player-slot empty" id="slot2">3. Vacío</div>
+        <div class="lobby-player-slot empty" id="slot3">4. Vacío</div>
+      </div>
+
+      <div id="lanLobbyStatus" style="font-size:13px;color:#d4a21a;margin:10px 0;font-weight:bold;">Esperando compañeros...</div>
+
+      <button id="lanStartGameBtn" class="btn-main-play primary-solo" style="width:100%;margin-top:10px;" onclick="window.lanStartGame && window.lanStartGame()" hidden>
+        🚀 Iniciar Combate
+      </button>
+    </div>
+  </div>
+</div></div>
 
 <!-- OVERLAY DE SOLDADO CAÍDO -->
 <div id="downedOverlay" hidden>
@@ -4760,6 +5621,29 @@ applyQuality(); resetGame(); g.state = 'menu';
   <button id="reviveBtn" class="hudbtn pulse">💉 MANTÉN [E] O PULSA AQUÍ PARA REVIVIR</button>
 </div>
 <!-- HUD COMPANEROS -->
+
+<!-- PUNTO 1: MODAL DE VICTORIA COMPARTIDA (OLEADA 10) -->
+<div id="victoryModal" class="victory-modal-overlay" hidden>
+  <div class="victory-card-box">
+    <div class="victory-stars-anim">★★★★★</div>
+    <h1>¡VICTORIA!</h1>
+    <p>SECTOR ASEGURADO · OLEADA 10 SUPERADA</p>
+    
+    <div class="victory-vote-info" id="victoryVoteStatus">
+      Elige una acción para sincronizar con tu escuadrón:
+    </div>
+
+    <div class="victory-actions-grid">
+      <button id="btnVictoryRestart" class="btn-victory-opt restart" onclick="window.castVictoryVote && window.castVictoryVote('restart')">
+        🔁 Reiniciar (Oleada 1)
+      </button>
+      <button id="btnVictoryContinue" class="btn-victory-opt continue" onclick="window.castVictoryVote && window.castVictoryVote('continue')">
+        ▶️ Seguir Jugando (Libre)
+      </button>
+    </div>
+  </div>
+</div>
+
 <div id="mpHud" hidden>
   <!-- BOTÓN PING PRINCIPAL (abre menú radial) -->
   <button id="pingBtn" ontouchstart="togglePingMenu(event)" style="display:none;position:fixed;right:14px;bottom:220px;width:56px;height:56px;border-radius:50%;background:rgba(255,165,0,0.9);border:2.5px solid #ffa500;color:#fff;font-size:1.4em;z-index:620;box-shadow:0 2px 10px #0008;touch-action:none">📍</button>
