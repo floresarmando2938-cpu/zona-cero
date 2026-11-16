@@ -3078,20 +3078,33 @@
   }
   function stopMenuLoop() { if (SMP.menuLoop) { try { SMP.menuLoop.s.stop(); } catch (_) {} SMP.menuLoop = null; } }
   function bootVideo() {
-    const v = $('vidIntro'), vi = $('vintro'), skip = $('vSkip');
+    const v = $('vidIntro'), vi = $('vintro'), skip = $('vSkip'), vl = $('vload');
     let on = true; try { on = localStorage.getItem('zc3d.intro') !== '0'; } catch (_) {}
-    if (!on) { vi.hidden = true; show('menu'); return; }
-    v.muted = false; v.volume = (typeof VOL !== 'undefined' ? VOL.s : 0.9);
+    if (!on) { if (vi) vi.hidden = true; if (vl) vl.hidden = true; show('menu'); return; }
     let done = false;
     const toMenu = () => {
-      if (done) return; done = true; v.onended = null; v.onerror = null; skip.hidden = true;
-      try { v.pause(); } catch (_) {}
-      videoDone = true; show('menu');   // el último cuadro queda fijo detrás del menú
+      if (done) return; done = true;
+      if (v) { v.onended = null; v.onerror = null; try { v.pause(); } catch (_) {} }
+      if (skip) skip.hidden = true;
+      if (vl) vl.hidden = true;
+      videoDone = true;
+      show('menu');
     };
-    v.onplaying = () => { $('vload').hidden = true; v.style.opacity = '1'; };
-    v.onended = toMenu; v.onerror = toMenu;
-    skip.onclick = e => { e.stopPropagation(); toMenu(); };
-    const pr = v.play(); if (pr && pr.catch) pr.catch(toMenu);
+    if (v) {
+      v.muted = false;
+      v.volume = (typeof VOL !== 'undefined' ? VOL.s : 0.9);
+      v.onplaying = () => { if (vl) vl.hidden = true; v.style.opacity = '1'; };
+      v.onended = toMenu;
+      v.onerror = toMenu;
+      try {
+        const pr = v.play();
+        if (pr && pr.catch) pr.catch(toMenu);
+      } catch (_) { toMenu(); }
+    }
+    if (skip) skip.onclick = e => { e.stopPropagation(); toMenu(); };
+    if (vi) vi.onclick = () => { if (!done) toMenu(); };
+    // Seguridad para móviles: si en 1.5s no reproduce, pasa directo al menú
+    setTimeout(() => { if (!done) toMenu(); }, 1800);
   }
   bootVideo();
   $('playBtn').onclick = startIntro;
@@ -4279,7 +4292,7 @@ function _showBasicScoreboard(statsList, isVictory, wave) {
     '<th style="padding:10px 14px">Revives</th>' +
     '<th style="padding:10px 14px">Puntos</th>' +
     '</tr></thead><tbody>' + rows + '</tbody></table>' +
-    '<button onclick="document.getElementById('mpScoreboard').remove()" ' +
+    '<button onclick="document.getElementById(\'mpScoreboard\').remove()" ' +
     'style="margin-top:28px;padding:12px 36px;background:#c0392b;color:#fff;border:none;border-radius:8px;font-size:1.1em;cursor:pointer">Volver al Lobby</button>';
 
   document.body.appendChild(overlay);
