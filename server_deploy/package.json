@@ -1,0 +1,15 @@
+{
+  "name": "zona-cero-server",
+  "version": "1.0.0",
+  "description": "Servidor WebSocket Multijugador para Zona Cero 3D",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
