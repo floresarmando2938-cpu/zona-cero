@@ -1,7 +1,10 @@
 // ============================================================
 //  ZONA CERO 3D — Servidor Multijugador en la Nube (Render)
 //  Tecnología: Node.js + http + ws (WebSocket)
-//  Multi-Salas (Room Codes) + Revivir + Pings + Suministros + MVP
+//  Multi-Salas (Códigos 4 caracteres) + Salas Públicas/Privadas
+//  Modos (Campaña Nivel 10 / Infinita) + 4 Dificultades
+//  Victoria Sincronizada (Votación Reiniciar / Seguir) + Host Migration
+//  Revivir + Pings 3D + Suministros + Scoreboard MVP
 // ============================================================
 
 'use strict';
@@ -10,11 +13,24 @@ const http = require('http');
 const { WebSocketServer } = require('ws');
 
 const PORT = process.env.PORT || 8765;
-const MAX_PLAYERS_PER_ROOM = 6;
-const TICK_MS = 50;   // broadcast de world-state cada 50ms (20fps)
+const MAX_PLAYERS_PER_ROOM = 4; // Límite cooperativo: 4 jugadores
+const TICK_MS = 50;            // broadcast de world-state cada 50ms (20fps)
 
 // Estructura de Salas: Map<roomCode, Room>
-// Room = { code, hostId, players: Map<id, playerState>, killedZombies: Set, sharedDrops: Map, stats: Map, createdAt: number }
+// Room = {
+//   code: string,
+//   name: string,
+//   isPrivate: boolean,
+//   mode: 'campaign' | 'survival',
+//   difficulty: 'easy' | 'normal' | 'hard' | 'extreme',
+//   hostId: string,
+//   players: Map<id, playerState>,
+//   killedZombies: Set,
+//   sharedDrops: Map,
+//   stats: Map,
+//   victoryVotes: Map<id, 'restart' | 'continue'>,
+//   createdAt: number
+// }
 const rooms = new Map();
 const socketToRoom = new Map(); // ws -> { roomId, playerId }
 
@@ -37,19 +53,24 @@ function send(ws, obj) {
   }
 }
 
-function getOrCreateRoom(code) {
+function getOrCreateRoom(code, meta = {}) {
   const c = String(code || 'GLOBAL').trim().toUpperCase();
   if (!rooms.has(c)) {
     rooms.set(c, {
       code: c,
+      name: (meta.name && String(meta.name).trim().slice(0, 20)) || `Sala ${c}`,
+      isPrivate: meta.isPrivate !== undefined ? !!meta.isPrivate : true,
+      mode: meta.mode === 'survival' ? 'survival' : 'campaign',
+      difficulty: ['easy', 'normal', 'hard', 'extreme'].includes(meta.difficulty) ? meta.difficulty : 'normal',
       hostId: null,
       players: new Map(),
       killedZombies: new Set(),
       sharedDrops: new Map(), // dropId -> { type, x, z, from }
       stats: new Map(),       // playerId -> { kills, headshots, revives, score, name }
+      victoryVotes: new Map(),// playerId -> 'restart' | 'continue'
       createdAt: Date.now()
     });
-    console.log(`[Sala Creada] Código: ${c}`);
+    console.log(`[Sala Creada] Código: ${c} | Nombre: ${rooms.get(c).name} | Modo: ${rooms.get(c).mode} | Dif: ${rooms.get(c).difficulty} | Privada: ${rooms.get(c).isPrivate}`);
   }
   return rooms.get(c);
 }
@@ -58,7 +79,7 @@ function broadcastRoom(room, obj, excludeId = null) {
   if (!room) return;
   const msg = JSON.stringify(obj);
   for (const [id, p] of room.players) {
-    if (id !== excludeId && p.ws.readyState === 1) {
+    if (id !== excludeId && p.ws && p.ws.readyState === 1) {
       try { p.ws.send(msg); } catch(_) {}
     }
   }
@@ -70,13 +91,13 @@ function promoteNextHost(room) {
   if (first) {
     room.hostId = first;
     const hPlayer = room.players.get(first);
-    console.log(`[Host] [${room.code}] Nuevo host asignado: ${hPlayer ? hPlayer.name : ''} (${first})`);
-    broadcastRoom(room, { t: 'host', id: first });
+    console.log(`[Host Migration] [${room.code}] Nuevo host asignado: ${hPlayer ? hPlayer.name : ''} (${first})`);
+    broadcastRoom(room, { t: 'host', id: first, hostName: hPlayer ? hPlayer.name : 'Host' });
   } else {
     room.hostId = null;
     if (room.code !== 'GLOBAL') {
       rooms.delete(room.code);
-      console.log(`[Sala Cerrada] Código: ${room.code} (vacía)`);
+      console.log(`[Sala Destruida] Código: ${room.code} (quedó vacía)`);
     }
   }
 }
@@ -163,14 +184,60 @@ wss.on('connection', (ws) => {
     try { msg = JSON.parse(raw); } catch { return; }
 
     switch (msg.t) {
+      // ── Consulta de salas públicas (Punto 9) ──
+      case 'listRooms': {
+        const publicRooms = [];
+        for (const [code, r] of rooms) {
+          if (!r.isPrivate && code !== 'GLOBAL') {
+            publicRooms.push({
+              code: r.code,
+              name: r.name,
+              mode: r.mode,
+              difficulty: r.difficulty,
+              playersCount: r.players.size,
+              maxPlayers: MAX_PLAYERS_PER_ROOM,
+              isFull: r.players.size >= MAX_PLAYERS_PER_ROOM
+            });
+          }
+        }
+        send(ws, { t: 'roomList', rooms: publicRooms });
+        break;
+      }
+
+      // ── Unirse o crear sala (Puntos 2, 5, 6, 8, 9) ──
       case 'join': {
         const name = String(msg.name || playerName).trim().slice(0, 18) || 'Soldado';
-        const roomCode = String(msg.room || msg.code || (msg.create ? generateRoomCode() : 'GLOBAL')).trim().toUpperCase();
+        const isCreating = !!msg.create;
+        let roomCode = String(msg.room || msg.code || '').trim().toUpperCase();
 
-        currentRoom = getOrCreateRoom(roomCode);
+        if (isCreating) {
+          roomCode = generateRoomCode();
+          const customName = msg.roomName ? String(msg.roomName).trim().slice(0, 20) : `Sala de ${name}`;
+          currentRoom = getOrCreateRoom(roomCode, {
+            name: customName || `Sala de ${name}`,
+            isPrivate: msg.isPrivate !== undefined ? !!msg.isPrivate : true,
+            mode: msg.mode || 'campaign',
+            difficulty: msg.difficulty || 'normal'
+          });
+        } else {
+          // Unirse con código o sala existente
+          if (!roomCode) roomCode = 'GLOBAL';
+
+          if (roomCode.length < 4 && roomCode !== 'GLOBAL') {
+            send(ws, { t: 'error', msg: 'El código de sala debe tener al menos 4 caracteres.' });
+            return;
+          }
+
+          if (!rooms.has(roomCode)) {
+            send(ws, { t: 'error', msg: `Sala "${roomCode}" no encontrada. Verifica el código o crea una nueva.` });
+            return;
+          }
+
+          currentRoom = rooms.get(roomCode);
+        }
 
         if (currentRoom.players.size >= MAX_PLAYERS_PER_ROOM) {
-          send(ws, { t: 'error', msg: `La sala ${roomCode} está llena (máx. ${MAX_PLAYERS_PER_ROOM} jugadores)` });
+          send(ws, { t: 'error', msg: `La sala ${roomCode} está llena (${MAX_PLAYERS_PER_ROOM}/${MAX_PLAYERS_PER_ROOM} jugadores)` });
           return;
         }
 
@@ -193,23 +260,37 @@ wss.on('connection', (ws) => {
         }
 
         send(ws, {
-          t:        'welcome',
+          t:          'welcome',
           id,
-          room:     currentRoom.code,
-          isHost:   id === currentRoom.hostId,
-          players:  existingPlayers,
+          room:       currentRoom.code,
+          roomName:   currentRoom.name,
+          isPrivate:  currentRoom.isPrivate,
+          mode:       currentRoom.mode,
+          difficulty: currentRoom.difficulty,
+          isHost:     id === currentRoom.hostId,
+          players:    existingPlayers,
         });
 
-        broadcastRoom(currentRoom, { t: 'join', id, name, room: currentRoom.code }, id);
-        console.log(`[Join] [${currentRoom.code}] ${name} (${id}) | Host: ${id === currentRoom.hostId} | Total: ${currentRoom.players.size}`);
+        broadcastRoom(currentRoom, {
+          t: 'join',
+          id,
+          name,
+          room: currentRoom.code
+        }, id);
+
+        console.log(`[Join] [${currentRoom.code}] ${name} (${id}) | Host: ${id === currentRoom.hostId} | Total: ${currentRoom.players.size}/${MAX_PLAYERS_PER_ROOM}`);
         break;
       }
 
       case 'startGame': {
         if (!currentRoom) return;
         if (!currentRoom.hostId || !currentRoom.players.has(currentRoom.hostId)) currentRoom.hostId = id;
-        broadcastRoom(currentRoom, { t: 'startGame' }, id);
-        console.log(`[StartGame] [${currentRoom.code}] Partida iniciada por ${playerName} (${id})`);
+        broadcastRoom(currentRoom, {
+          t: 'startGame',
+          mode: currentRoom.mode,
+          difficulty: currentRoom.difficulty
+        }, id);
+        console.log(`[StartGame] [${currentRoom.code}] Partida iniciada por ${playerName} (${id}) [Modo: ${currentRoom.mode}, Dif: ${currentRoom.difficulty}]`);
         break;
       }
 
@@ -250,6 +331,61 @@ wss.on('connection', (ws) => {
 
           broadcastRoom(currentRoom, { t: 'revive', targetId, reviverId: id, reviverName: playerName });
           console.log(`[Revive] [${currentRoom.code}] ${playerName} revivió a ${targetPlayer.name}`);
+        }
+        break;
+      }
+
+      // ── PUNTO 1: Victoria sincronizada en Oleada 10 ──
+      case 'victory': {
+        if (!currentRoom) return;
+        currentRoom.victoryVotes.clear();
+        broadcastRoom(currentRoom, {
+          t: 'victory',
+          wave: msg.wave || 10,
+          room: currentRoom.code
+        });
+        console.log(`[Victoria] [${currentRoom.code}] ¡Victoria compartida en Oleada ${msg.wave || 10}!`);
+        break;
+      }
+
+      // ── PUNTO 1: Votación de fin de partida (Reiniciar vs Seguir jugando) ──
+      case 'victoryVote': {
+        if (!currentRoom) return;
+        const vote = msg.vote; // 'restart' | 'continue'
+        currentRoom.victoryVotes.set(id, vote);
+
+        const totalPlayers = currentRoom.players.size;
+        const votesList = [];
+        let restartCount = 0;
+        let continueCount = 0;
+
+        for (const [pid, v] of currentRoom.victoryVotes) {
+          const pl = currentRoom.players.get(pid);
+          votesList.push({ id: pid, name: pl ? pl.name : 'Soldado', vote: v });
+          if (v === 'restart') restartCount++;
+          if (v === 'continue') continueCount++;
+        }
+
+        console.log(`[VictoryVote] [${currentRoom.code}] ${playerName} votó "${vote}" (${votesList.length}/${totalPlayers})`);
+
+        // Si todos votaron por la misma opción:
+        if (restartCount === totalPlayers) {
+          console.log(`[VictoryAction] [${currentRoom.code}] Todos acordaron REINICIAR.`);
+          currentRoom.victoryVotes.clear();
+          currentRoom.killedZombies.clear();
+          currentRoom.sharedDrops.clear();
+          broadcastRoom(currentRoom, { t: 'victoryAction', action: 'restart' });
+        } else if (continueCount === totalPlayers) {
+          console.log(`[VictoryAction] [${currentRoom.code}] Todos acordaron SEGUIR JUGANDO.`);
+          currentRoom.victoryVotes.clear();
+          broadcastRoom(currentRoom, { t: 'victoryAction', action: 'continue' });
+        } else {
+          // Notificar estado de votos para feedback visual ("Esperando confirmación...")
+          broadcastRoom(currentRoom, {
+            t: 'victoryVoteStatus',
+            votes: votesList,
+            total: totalPlayers
+          });
         }
         break;
       }
@@ -388,6 +524,12 @@ wss.on('connection', (ws) => {
         break;
       }
 
+      // Salida voluntaria de la sala
+      case 'leave': {
+        handleDisconnect();
+        break;
+      }
+
       default:
         break;
     }
@@ -397,6 +539,7 @@ wss.on('connection', (ws) => {
     socketToRoom.delete(ws);
     if (!currentRoom || !currentRoom.players.has(id)) return;
     currentRoom.players.delete(id);
+    currentRoom.victoryVotes.delete(id);
     console.log(`[-] [${currentRoom.code}] Desconectado: ${playerName} (${id}) | Restantes: ${currentRoom.players.size}`);
     broadcastRoom(currentRoom, { t: 'leave', id });
 
@@ -414,5 +557,5 @@ wss.on('connection', (ws) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Servidor multijugador Zona Cero activo en puerto ${PORT}`);
+  console.log(`Servidor multijugador Zona Cero v2.0 activo en puerto ${PORT}`);
 });
