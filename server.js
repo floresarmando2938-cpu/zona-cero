@@ -1,7 +1,7 @@
 // ============================================================
 //  ZONA CERO 3D — Servidor Multijugador en la Nube (Render)
 //  Tecnología: Node.js + http + ws (WebSocket)
-//  Soporte Multi-Salas (Room Codes) + Sistema Revivir Co-Op
+//  Multi-Salas (Room Codes) + Revivir + Pings + Suministros + MVP
 // ============================================================
 
 'use strict';
@@ -14,11 +14,10 @@ const MAX_PLAYERS_PER_ROOM = 6;
 const TICK_MS = 50;   // broadcast de world-state cada 50ms (20fps)
 
 // Estructura de Salas: Map<roomCode, Room>
-// Room = { code, hostId, players: Map<id, playerState>, killedZombies: Set, createdAt: number }
+// Room = { code, hostId, players: Map<id, playerState>, killedZombies: Set, sharedDrops: Map, stats: Map, createdAt: number }
 const rooms = new Map();
 const socketToRoom = new Map(); // ws -> { roomId, playerId }
 
-// Generador de códigos de sala limpios de 4 caracteres alfanuméricos (sin caracteres confusos como 0/O, 1/I)
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 function generateRoomCode() {
   let code = '';
@@ -46,6 +45,8 @@ function getOrCreateRoom(code) {
       hostId: null,
       players: new Map(),
       killedZombies: new Set(),
+      sharedDrops: new Map(), // dropId -> { type, x, z, from }
+      stats: new Map(),       // playerId -> { kills, headshots, revives, score, name }
       createdAt: Date.now()
     });
     console.log(`[Sala Creada] Código: ${c}`);
@@ -73,7 +74,6 @@ function promoteNextHost(room) {
     broadcastRoom(room, { t: 'host', id: first });
   } else {
     room.hostId = null;
-    // Si la sala queda vacía y no es la global, eliminarla después de un tiempo
     if (room.code !== 'GLOBAL') {
       rooms.delete(room.code);
       console.log(`[Sala Cerrada] Código: ${room.code} (vacía)`);
@@ -93,7 +93,7 @@ const wss = new WebSocketServer({ server });
 
 // ── Tick de broadcast (World State) por sala ─────────────────
 setInterval(() => {
-  for (const [code, room] of rooms) {
+  for (const [, room] of rooms) {
     if (room.players.size === 0) continue;
 
     const worldPlayers = {};
@@ -163,7 +163,6 @@ wss.on('connection', (ws) => {
     try { msg = JSON.parse(raw); } catch { return; }
 
     switch (msg.t) {
-      // Unirse o crear una sala
       case 'join': {
         const name = String(msg.name || playerName).trim().slice(0, 18) || 'Soldado';
         const roomCode = String(msg.room || msg.code || (msg.create ? generateRoomCode() : 'GLOBAL')).trim().toUpperCase();
@@ -179,6 +178,7 @@ wss.on('connection', (ws) => {
         playerState.hasJoined = true;
         playerName = name;
         currentRoom.players.set(id, playerState);
+        currentRoom.stats.set(id, { kills: 0, headshots: 0, revives: 0, score: 0, name });
         socketToRoom.set(ws, { roomId: currentRoom.code, playerId: id });
 
         if (!currentRoom.hostId || !currentRoom.players.has(currentRoom.hostId)) {
@@ -244,16 +244,65 @@ wss.on('connection', (ws) => {
         if (targetPlayer) {
           targetPlayer.downed = false;
           targetPlayer.hp = 40;
+
+          const st = currentRoom.stats.get(id);
+          if (st) st.revives = (st.revives || 0) + 1;
+
           broadcastRoom(currentRoom, { t: 'revive', targetId, reviverId: id, reviverName: playerName });
           console.log(`[Revive] [${currentRoom.code}] ${playerName} revivió a ${targetPlayer.name}`);
         }
         break;
       }
 
-      // Marcador táctico (Ping 3D en el mapa)
+      // Ping Táctico 3D en el mapa
       case 'ping': {
         if (!currentRoom) return;
-        broadcastRoom(currentRoom, { t: 'ping', id, name: playerName, x: msg.x, z: msg.z, pingType: msg.pingType || 'alert' }, id);
+        broadcastRoom(currentRoom, {
+          t: 'ping',
+          id,
+          name: playerName,
+          x: msg.x,
+          z: msg.z,
+          pingType: msg.pingType || 'alerta'
+        });
+        console.log(`[Ping] [${currentRoom.code}] ${playerName} marcó (${msg.pingType || 'alerta'}) en (${msg.x?.toFixed(1)}, ${msg.z?.toFixed(1)})`);
+        break;
+      }
+
+      // Soltar suministro compartido en el suelo (munición o botiquín)
+      case 'sharedDrop': {
+        if (!currentRoom) return;
+        const dropId = uid();
+        const dropData = {
+          dropId,
+          type: msg.dropType || 'ammo',
+          x: msg.x,
+          z: msg.z,
+          fromName: playerName,
+          fromId: id
+        };
+        currentRoom.sharedDrops.set(dropId, dropData);
+        broadcastRoom(currentRoom, { t: 'sharedDrop', ...dropData });
+        console.log(`[Drop] [${currentRoom.code}] ${playerName} soltó suministro: ${msg.dropType}`);
+        break;
+      }
+
+      // Recoger suministro compartido
+      case 'pickupSharedDrop': {
+        if (!currentRoom) return;
+        const dropId = msg.dropId;
+        if (currentRoom.sharedDrops.has(dropId)) {
+          const drop = currentRoom.sharedDrops.get(dropId);
+          currentRoom.sharedDrops.delete(dropId);
+          broadcastRoom(currentRoom, {
+            t: 'pickupSharedDrop',
+            dropId,
+            pickerId: id,
+            pickerName: playerName,
+            dropType: drop.type
+          });
+          console.log(`[Pickup] [${currentRoom.code}] ${playerName} recogió ${drop.type}`);
+        }
         break;
       }
 
@@ -263,7 +312,15 @@ wss.on('connection', (ws) => {
         if (zid === undefined) break;
         if (!currentRoom.killedZombies.has(zid)) {
           currentRoom.killedZombies.add(zid);
-          broadcastRoom(currentRoom, { t: 'zkill', zid, killerId: id });
+
+          const st = currentRoom.stats.get(id);
+          if (st) {
+            st.kills = (st.kills || 0) + 1;
+            if (msg.headshot) st.headshots = (st.headshots || 0) + 1;
+            st.score = (st.score || 0) + 50;
+          }
+
+          broadcastRoom(currentRoom, { t: 'zkill', zid, killerId: id, headshot: !!msg.headshot });
         }
         break;
       }
@@ -293,6 +350,22 @@ wss.on('connection', (ws) => {
       case 'waveEnd': {
         if (!currentRoom) return;
         broadcastRoom(currentRoom, { t: 'waveEnd', wave: msg.wave, bonus: msg.bonus });
+        break;
+      }
+
+      // Sincronización y presentación de Estadísticas de fin de partida (Scoreboard / MVP)
+      case 'scoreboard': {
+        if (!currentRoom) return;
+        const statsList = [];
+        for (const [pid, st] of currentRoom.stats) {
+          statsList.push({ id: pid, ...st });
+        }
+        broadcastRoom(currentRoom, {
+          t: 'scoreboard',
+          stats: statsList,
+          isVictory: !!msg.isVictory,
+          wave: msg.wave || 1
+        });
         break;
       }
 
