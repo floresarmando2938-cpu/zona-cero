@@ -893,6 +893,216 @@ html, body {
   #menu #howBtn  { left: 74% !important; top: 79% !important; }
 }
 
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SISTEMA RESPONSIVE TOTAL PARA MÓVIL (LANDSCAPE Y PORTRAIT) Y PANTALLAS PC
+══════════════════════════════════════════════════════════════════════════ */
+
+/* Contenedor seguro base */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+
+/* ── LOBBY ONLINE (#lanLobby) ULTRA COMPACTO Y ADAPTABLE ────────────────── */
+#lanLobby {
+  box-sizing: border-box !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 200 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding: max(10px, var(--sat)) max(16px, var(--sar)) max(12px, var(--sab)) max(16px, var(--sal)) !important;
+  gap: 8px !important;
+}
+
+#lanPanel {
+  box-sizing: border-box !important;
+  width: min(94vw, 440px) !important;
+  max-width: 660px !important;
+  margin: 0 auto !important;
+  padding: 14px 18px !important;
+  gap: 10px !important;
+}
+
+/* En celulares horizontales (Landscape móvil: altura reducida <= 540px) */
+@media (min-aspect-ratio: 1/1) and (max-height: 540px) {
+  #lanLobby {
+    padding: max(4px, var(--sat)) max(14px, var(--sar)) max(6px, var(--sab)) max(14px, var(--sal)) !important;
+    gap: 4px !important;
+    justify-content: center !important;
+  }
+  #lanLobby h1 {
+    font-size: 18px !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 8px !important;
+  }
+  #lanLobby h1 small {
+    display: inline !important;
+    font-size: 9px !important;
+    letter-spacing: .15em !important;
+  }
+  #lanTabs {
+    gap: 6px !important;
+    margin: 0 !important;
+  }
+  #lanTabs .ltab {
+    padding: 4px 14px !important;
+    font-size: 11px !important;
+    border-radius: 4px !important;
+  }
+  #lanPanel {
+    width: min(96vw, 650px) !important;
+    max-width: 650px !important;
+    padding: 8px 16px !important;
+    gap: 6px !important;
+    border-width: 1.5px !important;
+  }
+  #lanPanel > label {
+    font-size: 9px !important;
+    margin-bottom: 2px !important;
+  }
+  #lanName {
+    padding: 3px 8px !important;
+    font-size: 12px !important;
+  }
+  .lan-config-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr 1fr !important;
+    gap: 6px !important;
+    margin-bottom: 4px !important;
+  }
+  .lan-cfg-label {
+    font-size: 9px !important;
+    gap: 2px !important;
+  }
+  .lan-cfg-input, .lan-cfg-select {
+    padding: 3px 5px !important;
+    font-size: 11px !important;
+    height: 26px !important;
+  }
+  #lanStatus, #lanStatus2, #lanStatus3 {
+    font-size: 11px !important;
+    padding: 2px 0 !important;
+  }
+  /* Botones del lobby en horizontal: uno al lado del otro */
+  #lanPanel .lbtn {
+    padding: 7px 18px !important;
+    font-size: 12px !important;
+    margin: 0 !important;
+  }
+  #lanActBtn, #lanStartBtn, #lanBackBtn {
+    display: inline-block !important;
+    vertical-align: middle !important;
+  }
+  #lanBackBtn {
+    margin-top: 4px !important;
+  }
+}
+
+/* ── OVERLAYS Y CARDS (#setS, #pauseS, #howS, #shopS, #doneS, #metaS) ───── */
+.ov {
+  box-sizing: border-box !important;
+  padding: max(8px, var(--sat)) max(12px, var(--sar)) max(10px, var(--sab)) max(12px, var(--sal)) !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.ov .card {
+  box-sizing: border-box !important;
+  max-width: min(94vw, 540px) !important;
+  max-height: calc(100vh - max(16px, var(--sat)) - max(16px, var(--sab))) !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  margin: auto !important;
+}
+
+@media (max-height: 520px) {
+  .ov .card {
+    padding: 10px 18px !important;
+    max-height: calc(100vh - 12px) !important;
+  }
+  .ov .card h2.big {
+    font-size: 18px !important;
+    margin: 0 0 6px 0 !important;
+  }
+  .ov .card .btn {
+    padding: 7px 16px !important;
+    font-size: 12px !important;
+  }
+  .ov .tabs {
+    margin-bottom: 6px !important;
+  }
+  .ov .tabs .tabb {
+    padding: 5px 12px !important;
+    font-size: 11px !important;
+  }
+  /* Tienda compacta */
+  #shopS {
+    max-width: min(96vw, 600px) !important;
+  }
+  #shopS .shopg {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
+    gap: 5px !important;
+  }
+  #shopS .it {
+    padding: 5px 8px !important;
+    font-size: 11px !important;
+  }
+  #shopS .it b {
+    font-size: 13px !important;
+  }
+  /* Fin de oleada */
+  #doneS dl.stats {
+    gap: 6px !important;
+    margin: 6px 0 !important;
+  }
+  /* Ajustes */
+  #setS .set label {
+    margin: 3px 0 !important;
+    font-size: 12px !important;
+  }
+}
+
+/* ── MODAL DE VICTORIA ULTRA RESPONSIVE ──────────────────────────────────── */
+#victoryModal > div {
+  box-sizing: border-box !important;
+  max-width: min(92vw, 360px) !important;
+  max-height: calc(100vh - 20px) !important;
+  overflow-y: auto !important;
+  padding: 18px 24px !important;
+}
+
+@media (max-height: 520px) {
+  #victoryModal > div {
+    padding: 12px 18px !important;
+  }
+  #victoryModal h2 {
+    font-size: 20px !important;
+    margin: 0 0 4px !important;
+  }
+  #victorySubtitle {
+    font-size: 12px !important;
+    margin: 0 0 10px !important;
+  }
+  #victoryModal button {
+    padding: 8px 16px !important;
+    font-size: 12px !important;
+    min-width: 100px !important;
+  }
+}
+
 </style>
 
 <div id="credits" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);color:#ddd;z-index:60;padding:22px 20px;overflow:auto;font:14px/1.55 system-ui,sans-serif" onclick="this.style.display='none'"><h2 style="margin:0 0 10px">Créditos</h2><p style="opacity:.75">Toca para cerrar</p><p><b>Soldado:</b> «Military tactical suit (LowPolyGameReady)» de DanlyVostok — CC BY 4.0</p><p><b>Base militar:</b> «Military Base #2 – Truck Masters India Simulator» de Villanueva-Jonatan-32621 — CC BY 4.0</p><p><b>Casa abandonada:</b> «Casa Abandonada 2» de Elbolillo — CC BY 4.0</p><p><b>Gasolinera:</b> «Gasolinera / Fuel station» de Cris Charmort — CC BY 4.0</p><p><b>Zombi gritón:</b> «Zombie Scream» de Juangamer — CC BY 4.0</p><p><b>Zombi perro:</b> «Zombie Dog» de Long Nguyễn — CC BY 4.0</p><p><b>Zombis:</b> «Polyart Zombies (Free Pack)» de Denys Almaral — licencia estándar de Sketchfab</p><p><b>Zombis, vehículos, objetos, armas y árboles:</b> Quaternius — CC0</p><p><b>Animaciones del personaje y de los zombis:</b> Mixamo (Adobe)</p><p><b>Texturas:</b> Poly Haven — CC0</p><p><b>Sonidos:</b> Mixkit y Freesound (pgi, superphat, drinkingwindgames)</p></div>
@@ -4859,9 +5069,11 @@ applyQuality(); resetGame(); g.state = 'menu';
       <button class="lbtn secondary" onclick="window.refreshPublicRooms && window.refreshPublicRooms()" style="margin-top:4px;font-size:12px;">🔄 Actualizar lista</button>
     </div>
     <div id="lanPlayers"></div>
-    <button class="lbtn primary" id="lanActBtn" onclick="window.lanAction && window.lanAction()">Crear Sala</button>
-    <button class="lbtn secondary" id="lanStartBtn" onclick="window.lanStartGame && window.lanStartGame()" hidden>Iniciar partida</button>
-    <button class="lbtn secondary" id="lanBackBtn" onclick="window.closeLobby && window.closeLobby(true)">Volver al menu</button>
+    <div class="lan-actions-row" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px;">
+      <button class="lbtn primary" id="lanActBtn" onclick="window.lanAction && window.lanAction()">Crear Sala</button>
+      <button class="lbtn secondary" id="lanStartBtn" onclick="window.lanStartGame && window.lanStartGame()" hidden>Iniciar partida</button>
+      <button class="lbtn secondary" id="lanBackBtn" onclick="window.closeLobby && window.closeLobby(true)">Volver al menú</button>
+    </div>
   </div>
 </div>
 
