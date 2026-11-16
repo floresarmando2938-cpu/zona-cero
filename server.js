@@ -22,7 +22,7 @@ const server = http.createServer((req, res) => {
 const wss = new WebSocketServer({ server });
 
 /**
- * players: Map<id, { ws, name, x, z, y, yaw, pitch, hp, anim, wpn, ready }>
+ * players: Map<id, { ws, name, x, z, y, yaw, pitch, hp, anim, wpn, ready, hasJoined, isAlive }>
  */
 const players = new Map();
 const killedZombies = new Set();
@@ -69,6 +69,7 @@ setInterval(() => {
 
   const worldPlayers = {};
   for (const [id, p] of players) {
+    if (!p.hasJoined) continue; // Solo jugadores ya identificados
     worldPlayers[id] = {
       x:     p.x,
       z:     p.z,
@@ -122,6 +123,7 @@ wss.on('connection', (ws) => {
     anim:   'idle',
     wpn:    0,
     ready:  false,
+    hasJoined: false,
     isAlive: true,
   };
   players.set(id, playerState);
@@ -148,6 +150,7 @@ wss.on('connection', (ws) => {
       case 'join': {
         const name = String(msg.name || playerName).slice(0, 32);
         playerState.name = name;
+        playerState.hasJoined = true;
         playerName = name;
 
         if (!hostId || !players.has(hostId)) {
@@ -156,7 +159,7 @@ wss.on('connection', (ws) => {
 
         const existingPlayers = [];
         for (const [pid, p] of players) {
-          if (pid !== id) {
+          if (pid !== id && p.hasJoined) {
             existingPlayers.push({ id: pid, name: p.name, hp: p.hp });
           }
         }
@@ -173,7 +176,6 @@ wss.on('connection', (ws) => {
       }
 
       case 'startGame': {
-        // Permitir que el host (o primer jugador) inicie la partida
         if (!hostId || !players.has(hostId)) hostId = id;
         broadcast({ t: 'startGame' }, id);
         console.log(`[StartGame] Partida iniciada por ${playerName} (${id})`);
@@ -209,6 +211,14 @@ wss.on('connection', (ws) => {
         break;
       }
 
+      case 'zpos': {
+        // Sincronización continua de posiciones de zombies desde el host
+        if (id === hostId && msg.list) {
+          broadcast({ t: 'zpos', list: msg.list }, id);
+        }
+        break;
+      }
+
       case 'wave': {
         const n = Number(msg.n);
         killedZombies.clear();
@@ -217,8 +227,21 @@ wss.on('connection', (ws) => {
         break;
       }
 
+      case 'waveEnd': {
+        // Fin de oleada: comunicar victoria de oleada y recompensas
+        broadcastAll({ t: 'waveEnd', wave: msg.wave, bonus: msg.bonus });
+        console.log(`[WaveEnd] Oleada ${msg.wave} completada. Bonus: $${msg.bonus}`);
+        break;
+      }
+
       case 'shoot': {
         broadcast({ t: 'shoot', id, zid: msg.zid, dmg: msg.dmg }, id);
+        break;
+      }
+
+      case 'shootAnim': {
+        // Efecto visual/sonoro de disparo entre compañeros
+        broadcast({ t: 'shootAnim', id, wpn: msg.wpn, yaw: msg.yaw, pitch: msg.pitch }, id);
         break;
       }
 
