@@ -2564,7 +2564,7 @@
     if (k === 'escape') { if (g.state === 'play') pause(); else if (g.state === 'pause') resume(); return; }
     if (k === 'p') { g.state === 'play' ? pause() : resume(); return; }
     if (k === 'r') startReload(); if (k >= '1' && k <= '6' && k.length === 1) equip(+k - 1); if (k === 'q') cycle(); if ((k === 'f' || k === 'v') && g.state === 'play') { if (LAN && LAN.active) lanSendPing('alerta'); else stab(); }
-    if (k === 'g') { if (LAN && LAN.active) lanSendDrop('ammo'); else throwG(); }
+    if (k === 'g') { if (LAN && LAN.active) { if (e.shiftKey) lanSendDrop('medkit'); else lanSendDrop('ammo'); } else throwG(); }
     keys[k] = true; if (k === ' ' || k.startsWith('arrow')) e.preventDefault();
   });
   addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
@@ -4207,6 +4207,31 @@ function lanCheckDropPickup() {
   }
 }
 
+// ── Menú radial de ping ──────────────────────
+function togglePingMenu(e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  const menu = document.getElementById('pingRadialMenu');
+  if (!menu) return;
+  const isOpen = menu.style.display === 'flex';
+  menu.style.display = isOpen ? 'none' : 'flex';
+}
+
+function selectPing(type, e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  const menu = document.getElementById('pingRadialMenu');
+  if (menu) menu.style.display = 'none';
+  lanSendPing(type);
+}
+
+// Cerrar menú si se toca fuera
+document.addEventListener('touchstart', function(e) {
+  const menu = document.getElementById('pingRadialMenu');
+  const btn  = document.getElementById('pingBtn');
+  if (menu && menu.style.display === 'flex' && e.target !== btn && !menu.contains(e.target)) {
+    menu.style.display = 'none';
+  }
+}, { passive: true });
+
 // Función para soltar un suministro (Tecla G o botón táctil)
 function lanSendDrop(type) {
   if (!LAN.active || !LAN.connected) return;
@@ -4365,6 +4390,7 @@ function lanEnterGame() {
     const _sh = document.getElementById('stickHint'); if (_sh) _sh.hidden = false;
     const _pb = document.getElementById('pingBtn'); if (_pb) _pb.style.display = 'block';
     const _db = document.getElementById('dropBtn'); if (_db) _db.style.display = 'block';
+    const _mb = document.getElementById('medkitBtn'); if (_mb) _mb.style.display = 'block';
   } else {
     document.body.classList.add('desk');
   }
@@ -4722,8 +4748,22 @@ applyQuality(); resetGame(); g.state = 'menu';
 </div>
 <!-- HUD COMPANEROS -->
 <div id="mpHud" hidden>
-  <button id="pingBtn" ontouchstart="lanSendPing('alerta')" style="display:none;position:fixed;right:90px;bottom:140px;width:56px;height:56px;border-radius:50%;background:rgba(255,165,0,0.85);border:2px solid #ffa500;color:#fff;font-size:1.3em;z-index:600;touch-action:none">📍</button>
-  <button id="dropBtn" ontouchstart="lanSendDrop('ammo')" style="display:none;position:fixed;right:90px;bottom:200px;width:56px;height:56px;border-radius:50%;background:rgba(100,220,100,0.85);border:2px solid #7bd88f;color:#fff;font-size:1.3em;z-index:600;touch-action:none">📦</button>
+  <!-- BOTÓN PING PRINCIPAL (abre menú radial) -->
+  <button id="pingBtn" ontouchstart="togglePingMenu(event)" style="display:none;position:fixed;right:14px;bottom:220px;width:56px;height:56px;border-radius:50%;background:rgba(255,165,0,0.9);border:2.5px solid #ffa500;color:#fff;font-size:1.4em;z-index:620;box-shadow:0 2px 10px #0008;touch-action:none">📍</button>
+
+  <!-- MENÚ RADIAL DE PING (oculto por defecto) -->
+  <div id="pingRadialMenu" style="display:none;position:fixed;right:12px;bottom:284px;z-index:625;flex-direction:column;align-items:flex-end;gap:8px">
+    <button ontouchstart="selectPing('peligro',event)"  style="width:52px;height:52px;border-radius:50%;background:rgba(255,60,60,0.9);border:2px solid #ff4040;color:#fff;font-size:1.2em;box-shadow:0 2px 8px #0008;touch-action:none" title="Peligro">⚠️</button>
+    <button ontouchstart="selectPing('avanzar',event)"  style="width:52px;height:52px;border-radius:50%;background:rgba(60,220,100,0.9);border:2px solid #3ddc64;color:#fff;font-size:1.2em;box-shadow:0 2px 8px #0008;touch-action:none" title="Avanzar">⬆️</button>
+    <button ontouchstart="selectPing('alerta',event)"   style="width:52px;height:52px;border-radius:50%;background:rgba(255,165,0,0.9);border:2px solid #ffa500;color:#fff;font-size:1.2em;box-shadow:0 2px 8px #0008;touch-action:none" title="Alerta">📍</button>
+    <button ontouchstart="selectPing('retirar',event)"  style="width:52px;height:52px;border-radius:50%;background:rgba(180,60,255,0.9);border:2px solid #c03dff;color:#fff;font-size:1.2em;box-shadow:0 2px 8px #0008;touch-action:none" title="Retirar">🔙</button>
+  </div>
+
+  <!-- BOTÓN DROP AMMO -->
+  <button id="dropBtn" ontouchstart="lanSendDrop('ammo')" style="display:none;position:fixed;right:14px;bottom:158px;width:56px;height:56px;border-radius:50%;background:rgba(100,220,100,0.9);border:2.5px solid #7bd88f;color:#fff;font-size:1.3em;z-index:620;box-shadow:0 2px 10px #0008;touch-action:none">🔫</button>
+
+  <!-- BOTÓN DROP MEDKIT -->
+  <button id="medkitBtn" ontouchstart="lanSendDrop('medkit')" style="display:none;position:fixed;right:14px;bottom:98px;width:56px;height:56px;border-radius:50%;background:rgba(255,60,80,0.9);border:2.5px solid #ff3c50;color:#fff;font-size:1.3em;z-index:620;box-shadow:0 2px 10px #0008;touch-action:none">🩺</button>
   <div id="extractionTimer" hidden style="position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(0,200,100,0.9);color:#fff;font-size:1.6em;font-weight:bold;padding:8px 24px;border-radius:8px;z-index:800;font-family:monospace">0:00</div>
 </div>
 <!-- CHAT -->
