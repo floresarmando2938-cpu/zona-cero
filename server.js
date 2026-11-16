@@ -10,12 +10,12 @@ const { WebSocketServer } = require('ws');
 
 const PORT = process.env.PORT || 8765;
 const MAX_PLAYERS = 8;
-const TICK_MS = 50;   // broadcast de world-state cada 50ms
+const TICK_MS = 50;   // broadcast de world-state cada 50ms (20fps)
 
 // Servidor HTTP para Render (Health check / keep-alive)
 const server = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Zona Cero WebSocket server is running');
+  res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+  res.end('Zona Cero WebSocket Server activo. Jugadores: ' + players.size);
 });
 
 // Servidor WebSocket montado sobre el servidor HTTP
@@ -33,7 +33,7 @@ function uid() {
 }
 
 function send(ws, obj) {
-  if (ws && ws.readyState === ws.OPEN) {
+  if (ws && ws.readyState === 1) { // 1 = WebSocket.OPEN
     try { ws.send(JSON.stringify(obj)); } catch(_) {}
   }
 }
@@ -41,7 +41,7 @@ function send(ws, obj) {
 function broadcast(obj, excludeId = null) {
   const msg = JSON.stringify(obj);
   for (const [id, p] of players) {
-    if (id !== excludeId && p.ws.readyState === p.ws.OPEN) {
+    if (id !== excludeId && p.ws.readyState === 1) {
       try { p.ws.send(msg); } catch(_) {}
     }
   }
@@ -53,14 +53,17 @@ function broadcastAll(obj) {
 
 function promoteNextHost() {
   const first = players.keys().next().value;
-  if (first && first !== hostId) {
+  if (first) {
     hostId = first;
-    console.log(`[Host] Nuevo host: ${players.get(hostId).name} (${hostId})`);
+    const hPlayer = players.get(hostId);
+    console.log(`[Host] Host asignado: ${hPlayer ? hPlayer.name : ''} (${hostId})`);
     broadcastAll({ t: 'host', id: hostId });
+  } else {
+    hostId = null;
   }
 }
 
-// ── Tick de broadcast (World State) ─────────────────────────
+// ── Tick de broadcast (World State) ──────────────────────────
 setInterval(() => {
   if (players.size === 0) return;
 
@@ -82,7 +85,24 @@ setInterval(() => {
   broadcastAll({ t: 'world', players: worldPlayers, ts: Date.now() });
 }, TICK_MS);
 
-// ── Conexiones WebSocket ─────────────────────────────────────
+// ── Ping / Keep-alive para evitar desconexiones en móviles ────
+const pingInterval = setInterval(() => {
+  for (const [id, p] of players) {
+    if (p.isAlive === false) {
+      console.log(`[Heartbeat] Cerrando conexión inactiva: ${p.name} (${id})`);
+      p.ws.terminate();
+      players.delete(id);
+      if (id === hostId) promoteNextHost();
+      continue;
+    }
+    p.isAlive = false;
+    try { p.ws.ping(); } catch(_) {}
+  }
+}, 25000);
+
+wss.on('close', () => clearInterval(pingInterval));
+
+// ── Conexiones WebSocket ──────────────────────────────────────
 wss.on('connection', (ws) => {
   if (players.size >= MAX_PLAYERS) {
     send(ws, { t: 'error', msg: 'Servidor lleno (máx. 8 jugadores)' });
@@ -95,24 +115,28 @@ wss.on('connection', (ws) => {
 
   const playerState = {
     ws,
-    name:  playerName,
+    name:    playerName,
     x: 0, z: 0, y: 0,
     yaw: 0, pitch: 0,
-    hp:   100,
-    anim: 'idle',
-    wpn:  0,
-    ready: false,
+    hp:     100,
+    anim:   'idle',
+    wpn:    0,
+    ready:  false,
+    isAlive: true,
   };
   players.set(id, playerState);
 
-  if (players.size === 1) {
+  ws.on('pong', () => { playerState.isAlive = true; });
+
+  if (!hostId || !players.has(hostId)) {
     hostId = id;
-    console.log(`[Host] Host inicial: (${id})`);
+    console.log(`[Host] Host asignado: (${id})`);
   }
 
   console.log(`[+] Conexión establecida (${id}) | Total: ${players.size}`);
 
   ws.on('message', (raw) => {
+    playerState.isAlive = true;
     let msg;
     try {
       msg = JSON.parse(raw);
@@ -125,6 +149,10 @@ wss.on('connection', (ws) => {
         const name = String(msg.name || playerName).slice(0, 32);
         playerState.name = name;
         playerName = name;
+
+        if (!hostId || !players.has(hostId)) {
+          hostId = id;
+        }
 
         const existingPlayers = [];
         for (const [pid, p] of players) {
@@ -140,15 +168,15 @@ wss.on('connection', (ws) => {
         });
 
         broadcast({ t: 'join', id, name }, id);
-        console.log(`[Join] ${name} (${id}) | Host: ${id === hostId}`);
+        console.log(`[Join] ${name} (${id}) | Host: ${id === hostId} | Total: ${players.size}`);
         break;
       }
 
       case 'startGame': {
-        if (id === hostId) {
-          broadcast({ t: 'startGame' }, id);
-          console.log(`[StartGame] Host inició la partida`);
-        }
+        // Permitir que el host (o primer jugador) inicie la partida
+        if (!hostId || !players.has(hostId)) hostId = id;
+        broadcast({ t: 'startGame' }, id);
+        console.log(`[StartGame] Partida iniciada por ${playerName} (${id})`);
         break;
       }
 
@@ -176,14 +204,12 @@ wss.on('connection', (ws) => {
       }
 
       case 'zspawn': {
-        if (id !== hostId) break;
         const { zid, type, x, z } = msg;
         broadcast({ t: 'zspawn', zid, type, x, z }, id);
         break;
       }
 
       case 'wave': {
-        if (id !== hostId) break;
         const n = Number(msg.n);
         killedZombies.clear();
         broadcastAll({ t: 'wave', n });
@@ -241,5 +267,5 @@ wss.on('connection', (ws) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Servidor LAN activo en puerto ${PORT}`);
+  console.log(`Servidor multijugador Zona Cero activo en puerto ${PORT}`);
 });
