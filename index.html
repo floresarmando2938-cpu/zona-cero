@@ -1103,6 +1103,19 @@ html, body {
   }
 }
 
+
+/* ── Garantía de ocultamiento estricto de #lanLobby ── */
+#lanLobby[hidden], #lanLobby.hidden {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  z-index: -100 !important;
+}
+#lanLobby:not([hidden]) {
+  display: flex !important;
+}
+
 </style>
 
 <div id="credits" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);color:#ddd;z-index:60;padding:22px 20px;overflow:auto;font:14px/1.55 system-ui,sans-serif" onclick="this.style.display='none'"><h2 style="margin:0 0 10px">Créditos</h2><p style="opacity:.75">Toca para cerrar</p><p><b>Soldado:</b> «Military tactical suit (LowPolyGameReady)» de DanlyVostok — CC BY 4.0</p><p><b>Base militar:</b> «Military Base #2 – Truck Masters India Simulator» de Villanueva-Jonatan-32621 — CC BY 4.0</p><p><b>Casa abandonada:</b> «Casa Abandonada 2» de Elbolillo — CC BY 4.0</p><p><b>Gasolinera:</b> «Gasolinera / Fuel station» de Cris Charmort — CC BY 4.0</p><p><b>Zombi gritón:</b> «Zombie Scream» de Juangamer — CC BY 4.0</p><p><b>Zombi perro:</b> «Zombie Dog» de Long Nguyễn — CC BY 4.0</p><p><b>Zombis:</b> «Polyart Zombies (Free Pack)» de Denys Almaral — licencia estándar de Sketchfab</p><p><b>Zombis, vehículos, objetos, armas y árboles:</b> Quaternius — CC0</p><p><b>Animaciones del personaje y de los zombis:</b> Mixamo (Adobe)</p><p><b>Texturas:</b> Poly Haven — CC0</p><p><b>Sonidos:</b> Mixkit y Freesound (pgi, superphat, drinkingwindgames)</p></div>
@@ -4836,9 +4849,12 @@ function lanToMenu() {
 var _lanMode = 'create';
 
 function openLobby() {
-  show('menu');
   const lb = document.getElementById('lanLobby');
-  if (lb) lb.hidden = false;
+  if (lb) {
+    lb.hidden = false;
+    lb.classList.remove('hidden');
+    lb.style.setProperty('display', 'flex', 'important');
+  }
   const savedName = localStorage.getItem('zc3d.name');
   if (savedName) {
     const ni = document.getElementById('lanName');
@@ -4849,13 +4865,18 @@ function openLobby() {
 
 function closeLobby(isLeaving) {
   const lb = document.getElementById('lanLobby');
-  if (lb) lb.hidden = true;
+  if (lb) {
+    lb.hidden = true;
+    lb.classList.add('hidden');
+    lb.style.setProperty('display', 'none', 'important');
+  }
   if (isLeaving === true && LAN.ws) {
     try { LAN.ws.close(); } catch(_) {}
     LAN.ws = null;
     LAN.connected = false;
     LAN.roomCode = null;
   }
+  if (isLeaving) show('menu');
 }
 
 function lanTab(mode) {
@@ -4986,9 +5007,9 @@ window.lanStartGame = lanStartGame;
 window.copyRoomCode = copyRoomCode;
 
 const _mpBtn = document.getElementById('mpBtn');
-if (_mpBtn) _mpBtn.onclick = function() { show(null); openLobby(); };
+if (_mpBtn) _mpBtn.onclick = function() { openLobby(); };
 
-applyQuality(); resetGame(); g.state = 'menu';
+closeLobby(false); applyQuality(); resetGame(); g.state = 'menu';
   $('qBtn').onclick = () => setQuality((QI + 1) % 3); $('qual').onchange = e => setQuality(+e.target.value);
   $('camBtn').onclick = () => setCam3(!CAM3); setCam3(CAM3);
   $('perfBtn').onclick = () => setPerf(!PERF.on); try { setPerf(localStorage.getItem('zc3d.perf') === '1'); } catch (_) { setPerf(false); } $('credBtn').onclick = () => { $('credits').style.display = 'block'; };
@@ -5006,7 +5027,7 @@ applyQuality(); resetGame(); g.state = 'menu';
 
 
 <!-- MULTIPLAYER LOBBY -->
-<div id="lanLobby" hidden>
+<div id="lanLobby" hidden class="hidden" style="display:none !important;">
   <h1>Zona Cero<small>MULTIJUGADOR CO-OP EN LA NUBE</small></h1>
   <div id="lanTabs">
     <button class="ltab on" id="ltCreate" onclick="window.lanTab && window.lanTab('create')">Crear Sala</button>
