@@ -3281,8 +3281,10 @@ html, body {
   function applyLayout() {
     const isPortrait = window.innerWidth < window.innerHeight;
     const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.innerWidth < 900;
-    // Escala dinámica según dimensiones para que no se sobrepongan en pantallas pequeñas
-    const uiScale = isMobile ? clamp(Math.min(window.innerWidth / 740, window.innerHeight / 420), 0.72, 1.0) : 1;
+    // Durante gameplay activo NO escalar controles (evita que queden desplazados)
+    const duringPlay = (typeof g !== 'undefined' && g.state === 'play') ||
+                       (typeof LAN !== 'undefined' && LAN.active);
+    const uiScale = (isMobile && !duringPlay) ? clamp(Math.min(window.innerWidth / 740, window.innerHeight / 420), 0.72, 1.0) : 1;
 
     for (const id of Object.keys(LAY_DEF)) {
       const el = document.getElementById(id); if (!el) continue;
@@ -4671,6 +4673,8 @@ function copyRoomCode() {
 function lanStartGame() {
   if (!LAN.isHost || !LAN.ws) return;
   LAN.ws.send(JSON.stringify({ t: 'startGame' }));
+  // El host entra al juego inmediatamente (el server hace broadcast a los guests)
+  lanEnterGame();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -4697,6 +4701,13 @@ function lanEnterGame() {
   stick = null;
   input.fire = false;
   startGame();
+  // Corregir posición de controles táctiles después de entrar al juego
+  setTimeout(() => {
+    try { if (typeof resize === 'function') resize(); } catch(_) {}
+  }, 150);
+  setTimeout(() => {
+    try { if (typeof resize === 'function') resize(); } catch(_) {}
+  }, 500);
 }
 
 let _isHoldingRevive = false;
@@ -4832,8 +4843,24 @@ function lanDrawRadar() {
 }
 
 function lanToMenu() {
-  for (const pid in LAN.players) removePeer(pid);
+  // Limpiar todos los peers
+  try { for (const pid in LAN.players) removePeer(pid); } catch(_) {}
   LAN.players = {};
+
+  // Cerrar WebSocket completamente
+  if (LAN.ws) {
+    try { LAN.ws.close(); } catch(_) {}
+    LAN.ws = null;
+  }
+
+  // Resetear estado LAN
+  LAN.active = false;
+  LAN.connected = false;
+  LAN.roomCode = null;
+  LAN.isHost = false;
+  LAN.id = null;
+
+  // Ocultar HUD y overlays del multijugador
   const hud = document.getElementById('mpHud');
   const chat = document.getElementById('mpChat');
   const dOv = document.getElementById('downedOverlay');
@@ -4842,6 +4869,8 @@ function lanToMenu() {
   if (chat) chat.hidden = true;
   if (dOv) dOv.hidden = true;
   if (rev) rev.hidden = true;
+
+  // Resetear estado del jugador
   p.downed = false;
 }
 
@@ -4849,6 +4878,8 @@ function lanToMenu() {
 var _lanMode = 'create';
 
 function openLobby() {
+  // Silenciar música del menú al entrar al lobby
+  try { leaveMenuFx(); } catch(_) {}
   const lb = document.getElementById('lanLobby');
   if (lb) {
     lb.hidden = false;
