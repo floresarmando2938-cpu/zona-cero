@@ -1255,8 +1255,26 @@ html, body {
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lerp = (a, b, t) => a + (b - a) * t;
 
+  // Interceptor global de errores para dispositivos móviles
+  window.addEventListener('error', function(e) {
+    console.error('Zona Cero runtime error:', e.message, e.filename, e.lineno);
+    const vl = document.getElementById('vload');
+    if (vl) { vl.hidden = true; vl.style.display = 'none'; }
+    const errEl = document.getElementById('err');
+    if (errEl) { errEl.textContent = 'Aviso: ' + (e.message || 'Error de inicio') + ' (L:' + (e.lineno||0) + ')'; errEl.hidden = false; }
+    if (typeof show === 'function') { try { show('menu'); } catch(_) {} }
+  });
+
   function fail(msg) {
-    $('err').textContent = msg; $('err').hidden = false; $('playBtn').disabled = true;
+    const errEl = $('err');
+    if (errEl) { errEl.textContent = msg; errEl.hidden = false; }
+    const pb = $('playBtn');
+    if (pb) pb.disabled = true;
+    const vl = $('vload');
+    if (vl) { vl.hidden = true; vl.style.display = 'none'; }
+    const vi = $('vintro');
+    if (vi) vi.hidden = true;
+    if (typeof show === 'function') { try { show('menu'); } catch(_) {} }
   }
   if (!window.THREE) { fail('No se pudo cargar el motor 3D. Revisa tu conexión y recarga la página.'); return; }
 
@@ -3537,13 +3555,19 @@ html, body {
       }
     };
 
-    // Timeout de seguridad: si tras 3.5s el video no reproduce (bloqueo autoplay o codec en móvil), pasa directo al menú
+    // Timeout de seguridad corto: si tras 1.8s el video no inicia en móvil, pasa directo al menú
     const fallbackTimer = setTimeout(() => {
       if (!shown) {
         console.warn('Video intro autoplay timeout: avanzando al menú');
         toMenu();
       }
-    }, 3500);
+    }, 1800);
+
+    // Al tocar cualquier parte de la pantalla se avanza de inmediato al menú
+    window.addEventListener('pointerdown', function onFirstTouch() {
+      window.removeEventListener('pointerdown', onFirstTouch);
+      if (!videoDone) { toMenu(); }
+    }, { once: true });
 
     const pr = v.play();
     if (pr && pr.then) {
