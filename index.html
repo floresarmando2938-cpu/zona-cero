@@ -3311,8 +3311,8 @@ html, body {
     const isPortrait = window.innerWidth < window.innerHeight;
     const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.innerWidth < 900;
     // Durante gameplay activo NO escalar controles (evita que queden desplazados)
-    const duringPlay = (typeof g !== 'undefined' && g.state === 'play') ||
-                       (typeof LAN !== 'undefined' && LAN.active);
+    const duringPlay = (typeof g !== 'undefined' && g && g.state === 'play') ||
+                       (typeof LAN !== 'undefined' && LAN && LAN.active);
     const uiScale = (isMobile && !duringPlay) ? clamp(Math.min(window.innerWidth / 740, window.innerHeight / 420), 0.72, 1.0) : 1;
 
     for (const id of Object.keys(LAY_DEF)) {
@@ -4092,7 +4092,7 @@ html, body {
 
 
   /* ══ LAN MULTIPLAYER MODULE ══ */
-const LAN = {
+var LAN = {
   ws: null,
   id: null,
   roomCode: null,
