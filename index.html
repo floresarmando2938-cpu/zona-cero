@@ -3487,13 +3487,18 @@ html, body {
   }
   function stopMenuLoop() { if (SMP.menuLoop) { try { SMP.menuLoop.s.stop(); } catch (_) {} SMP.menuLoop = null; } }
   function bootVideo() {
-    const v = $('vidIntro'), vi = $('vintro'), skip = $('vSkip');
+    const v = $('vidIntro'), vi = $('vintro'), skip = $('vSkip'), vl = $('vload');
     let on = true; try { on = localStorage.getItem('zc3d.intro') !== '0'; } catch (_) {}
-    if (!on) { vi.hidden = true; show('menu'); return; }
+    if (!on) { if (vi) vi.hidden = true; show('menu'); return; }
+    if (!v) { show('menu'); return; }
+
     v.muted = false; v.volume = (typeof VOL !== 'undefined' ? VOL.s : 0.9);
     let done = false;
     const toMenu = () => {
-      if (done) return; done = true; v.onended = null; v.onerror = null; skip.hidden = true;
+      if (done) return; done = true;
+      v.onended = null; v.onerror = null;
+      if (skip) skip.hidden = true;
+      if (vl) { vl.hidden = true; vl.style.display = 'none'; }
       try { v.pause(); } catch (_) {}
       videoDone = true; show('menu');
     };
@@ -3501,25 +3506,57 @@ html, body {
     let shown = false;
     const showVid = () => {
       if (shown) return;
-      if ((v.currentTime > 0.05 || v.readyState >= 3) && !v.paused) {
-        shown = true;
-        v.style.opacity = '1';
-        const vl = $('vload');
-        if (vl) {
-          vl.style.transition = 'opacity .25s ease';
-          vl.style.opacity = '0';
-          setTimeout(() => { vl.hidden = true; vl.style.display = 'none'; }, 260);
-        }
+      shown = true;
+      v.style.opacity = '1';
+      if (vl) {
+        vl.style.transition = 'opacity .25s ease';
+        vl.style.opacity = '0';
+        setTimeout(() => { vl.hidden = true; vl.style.display = 'none'; }, 260);
       }
     };
 
-    v.onplaying = () => { setTimeout(showVid, 60); };
-    v.ontimeupdate = showVid;
+    v.onplaying = () => { showVid(); };
+    v.ontimeupdate = () => { if (v.currentTime > 0.05 || !v.paused) showVid(); };
+    v.oncanplay = () => { if (!v.paused) showVid(); };
     v.onended = toMenu;
     v.onerror = toMenu;
-    skip.onclick = e => { e.stopPropagation(); toMenu(); };
-    vi.onclick = () => { if (v.paused) { try { v.play(); } catch (_) {} } };
-    const pr = v.play(); if (pr && pr.catch) pr.catch(toMenu);
+    if (skip) skip.onclick = e => { e.stopPropagation(); toMenu(); };
+    if (vi) vi.onclick = () => {
+      if (v.paused) {
+        try { const p = v.play(); if (p && p.catch) p.catch(() => {}); } catch (_) {}
+      } else {
+        showVid();
+      }
+    };
+
+    // Timeout de seguridad: si tras 3.5s el video no reproduce (bloqueo autoplay o codec en móvil), pasa directo al menú
+    const fallbackTimer = setTimeout(() => {
+      if (!shown) {
+        console.warn('Video intro autoplay timeout: avanzando al menú');
+        toMenu();
+      }
+    }, 3500);
+
+    const pr = v.play();
+    if (pr && pr.then) {
+      pr.then(() => {
+        // En reproducción confirmada
+        setTimeout(showVid, 100);
+      }).catch(err => {
+        console.warn('Autoplay bloqueado con audio, reintentando silenciado:', err);
+        // Muchos navegadores móviles permiten autoplay sólo si muted = true
+        v.muted = true;
+        const pr2 = v.play();
+        if (pr2 && pr2.then) {
+          pr2.then(() => { setTimeout(showVid, 100); }).catch(toMenu);
+        } else {
+          toMenu();
+        }
+      });
+    } else {
+      // Navegador antiguo sin promesas en video.play
+      setTimeout(showVid, 200);
+    }
   }
   bootVideo();
   $('playBtn').onclick = startIntro;
